@@ -1944,12 +1944,23 @@
     }
     function avatarHTML(name, size) {
       const s = size || 32;
-      const photo = getAvatarOverride(name);
+      const photo = getAvatarOverride(name) || DISCORD_AVATARS[playerKey(name)];
       if (photo) {
-        return `<img src="${photo}" alt="${name}" style="width:${s}px;height:${s}px;border-radius:50%;object-fit:cover;flex-shrink:0;display:inline-block;vertical-align:middle;">`;
+        return `<img src="${photo}" alt="${name}" loading="lazy" onerror="handleAvatarError(this,'${encodeURIComponent(name)}')" style="width:${s}px;height:${s}px;border-radius:50%;object-fit:cover;flex-shrink:0;display:inline-block;vertical-align:middle;">`;
       }
       const c = colorForName(name);
       return `<div class="avatar" style="background:${c};${size ? `width:${size}px;height:${size}px;font-size:${size * 0.35}px;` : ''}">${initials(name)}</div>`;
+    }
+    /* If a Discord CDN image 404s or is unreachable, swap it for the same
+       colored-initials avatar avatarHTML() would have used anyway. */
+    function handleAvatarError(img, encodedName) {
+      const name = decodeURIComponent(encodedName);
+      const s = img.clientWidth || img.offsetWidth || 32;
+      const div = document.createElement('div');
+      div.className = 'avatar';
+      div.style.cssText = `background:${colorForName(name)};width:${s}px;height:${s}px;font-size:${Math.round(s * 0.35)}px;`;
+      div.textContent = initials(name);
+      img.replaceWith(div);
     }
     /* Same as avatarHTML but wraps it with a small always-visible edit button
        that opens the file picker — this is the "easy to change" entry point. */
@@ -2215,9 +2226,9 @@
         const rows = comparisonRows(season1Data, RAW);
         ranked = rows.map(r => ({name: r.name, points: r.total, played: r.played, wins: r.wins, podiums: r.podiums})).sort((a, b) => b.points - a.points || b.wins - a.wins).map((p, i) => ({...p, rank: i + 1})); label = 'Both seasons';
       } else {ranked = seasonStats(RAW); label = 'Season 2';}
-      main.innerHTML = `<section><h2 class="section-title">Player Directory</h2><div class="filters"><button class="filter-btn ${seasonKey === 's2' ? 'active' : ''}" data-directory-season="s2">Season 2</button><button class="filter-btn ${seasonKey === 's1' ? 'active' : ''}" data-directory-season="s1">Season 1</button><button class="filter-btn ${seasonKey === 'both' ? 'active' : ''}" data-directory-season="both">Both</button></div><p style="color:var(--muted);font-size:13px;margin:-6px 0 16px;">${label} · ${ranked.length} player${ranked.length === 1 ? '' : 's'}</p><input id="dirSearch" placeholder="Filter players..." style="width:100%;max-width:320px;margin-bottom:18px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);outline:none;"><div class="directory" id="directoryGrid">${ranked.map((p, i) => `<a href="#/player/${encodeURIComponent(p.name)}"><div class="player-card" data-name="${p.name.toLowerCase()}" style="animation-delay:${Math.min(i, 25) * 0.02}s"><div style="margin:0 auto 10px;">${avatarEditableHTML(p.name, 48, 17)}</div><div class="pname">${p.name}</div><div class="pmeta">Rank #${p.rank} · ${p.points} pts</div></div></a>`).join('')}</div></section>`;
+      main.innerHTML = `<section><h2 class="section-title">Player Directory</h2><div class="filters"><button class="filter-btn ${seasonKey === 's2' ? 'active' : ''}" data-directory-season="s2">Season 2</button><button class="filter-btn ${seasonKey === 's1' ? 'active' : ''}" data-directory-season="s1">Season 1</button><button class="filter-btn ${seasonKey === 'both' ? 'active' : ''}" data-directory-season="both">Both</button></div><p style="color:var(--muted);font-size:13px;margin:-6px 0 16px;">${label} · ${ranked.length} player${ranked.length === 1 ? '' : 's'}</p><input id="dirSearch" placeholder="Filter players..." style="width:100%;max-width:320px;margin-bottom:18px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);outline:none;"><div class="directory" id="directoryGrid">${ranked.map((p, i) => `<a href="#/player/${encodeURIComponent(p.name)}" class="player-card-link" data-name="${p.name.toLowerCase()}"><div class="player-card" style="animation-delay:${Math.min(i, 25) * 0.02}s"><div style="margin:0 auto 10px;">${avatarHTML(p.name, 48)}</div><div class="pname">${p.name}</div><div class="pmeta">Rank #${p.rank} · ${p.points} pts</div></div></a>`).join('')}</div></section>`;
       main.querySelectorAll('[data-directory-season]').forEach(btn => btn.addEventListener('click', () => renderPlayers(btn.dataset.directorySeason, season1Data)));
-      document.getElementById('dirSearch').addEventListener('input', e => {const q = e.target.value.toLowerCase(); document.querySelectorAll('#directoryGrid .player-card').forEach(card => card.style.display = card.dataset.name.includes(q) ? '' : 'none');});
+      document.getElementById('dirSearch').addEventListener('input', e => {const q = e.target.value.toLowerCase(); document.querySelectorAll('#directoryGrid .player-card-link').forEach(link => link.style.display = link.dataset.name.includes(q) ? '' : 'none');});
     }
 
     /* ============ RENDER: PLAYER PROFILE ============ */
@@ -2234,11 +2245,10 @@
       main.innerHTML = `
     <div class="breadcrumb"><a href="#/players">Players</a> / ${p.name}</div>
     <div class="profile-header">
-      ${avatarEditableHTML(p.name, 72, 26)}
+      ${avatarHTML(p.name, 72)}
       <div>
         <h1>${p.name}</h1>
         <div class="rank-tag">Rank #${p.rank} · ${moveIcon(p.movement || 0)}</div>
-        ${getAvatarOverride(p.name) ? `<button type="button" class="avatar-remove-link" data-player="${encodeURIComponent(p.name)}">Remove photo</button>` : `<span style="font-size:12px;color:var(--muted);">Click the 📷 to add a photo</span>`}
       </div>
     </div>
 
@@ -2365,7 +2375,7 @@
       const color = colorForName(profileName), podiumCopy = p.podiums ? `${p.podiums} podium${p.podiums === 1 ? '' : 's'} · ${(p.podiumRate * 100).toFixed(0)}% podium rate` : 'No podium finish recorded yet';
       main.innerHTML = `
     <div class="breadcrumb"><a href="#/players">Players</a> / ${profileName}</div>
-    <section class="profile-hero"><div class="profile-header">${avatarEditableHTML(profileName, 72, 26)}<div><h1>${profileName}</h1><div class="rank-tag">${seasonLabel} · ${rankLabel} #${p.rank ?? '—'}</div>${getAvatarOverride(profileName) ? `<button type="button" class="avatar-remove-link" data-player="${encodeURIComponent(profileName)}">Remove photo</button>` : '<span style="font-size:12px;color:var(--muted);">Click the 📷 to add a photo</span>'}</div></div>${profileTabs(seasonKey)}<div class="podium-banner"><div class="podium-icon">🏆</div><div><strong>${p.podiums ? 'Podium contender' : 'Building the record'}</strong>${podiumCopy} · ${p.wins} win${p.wins === 1 ? '' : 's'}</div></div></section>
+    <section class="profile-hero"><div class="profile-header">${avatarHTML(profileName, 72)}<div><h1>${profileName}</h1><div class="rank-tag">${seasonLabel} · ${rankLabel} #${p.rank ?? '—'}</div></div></div>${profileTabs(seasonKey)}<div class="podium-banner"><div class="podium-icon">🏆</div><div><strong>${p.podiums ? 'Podium contender' : 'Building the record'}</strong>${podiumCopy} · ${p.wins} win${p.wins === 1 ? '' : 's'}</div></div></section>
     <div class="stat-grid"><div class="card"><div class="label">Total Points</div><div class="value">${p.points}</div></div><div class="card"><div class="label">Editions Played</div><div class="value">${p.played}</div></div><div class="card profile-stat-emphasis"><div class="label">Podiums</div><div class="value">${p.podiums}</div></div><div class="card"><div class="label">Wins</div><div class="value">${p.wins}</div></div><div class="card"><div class="label">Avg Placement</div><div class="value">${p.avgPlacement.toFixed(2)}</div></div><div class="card"><div class="label">Best / Worst</div><div class="value" style="font-size:20px;">${p.best} / ${p.worst}</div></div><div class="card"><div class="label">Win Rate</div><div class="value">${(p.winRate * 100).toFixed(0)}%</div></div><div class="card"><div class="label">Podium Rate</div><div class="value">${(p.podiumRate * 100).toFixed(0)}%</div></div></div>
     <section><h2 class="section-title">Performance</h2><div class="grid" style="grid-template-columns:1fr;gap:16px;"><div class="panel"><div style="font-size:13px;color:var(--muted);margin-bottom:8px;">Placement over time</div><div class="chart-box" style="height:250px;"><canvas id="chartPlacement"></canvas></div></div><div class="panel"><div style="font-size:13px;color:var(--muted);margin-bottom:8px;">Cumulative points</div><div class="chart-box" style="height:250px;"><canvas id="chartCumulative"></canvas></div></div></div></section>
     <section><h2 class="section-title">Placement History</h2><div class="panel" style="overflow:auto;"><table><thead><tr><th>Edition</th><th>Placement</th><th>Points</th></tr></thead><tbody>${history.map(h => `<tr><td>${h.edition}</td><td>${h.placement <= 3 ? medalFor(h.placement) : ''}${h.placement}</td><td style="color:var(--accent);font-weight:700">${h.points}</td></tr>`).join('')}</tbody></table></div></section>`;
@@ -2615,6 +2625,17 @@
     }
 
     async function fetchChannelVideos() {
+      if (SPEEDTAS_API_URL) {
+        try {
+          const proxyUrl = SPEEDTAS_API_URL.replace(/\/+$/, '') + '/videos?channelId=' + encodeURIComponent(YT_CHANNEL_ID);
+          const res = await fetch(proxyUrl);
+          const data = await res.json();
+          if (res.ok && Array.isArray(data.videos)) return data.videos;
+          console.warn('Worker video proxy returned an error, falling back to the RSS feed:', data.error);
+        } catch (err) {
+          console.warn('Worker video proxy unreachable, falling back to the RSS feed:', err);
+        }
+      }
       const res = await fetch(YT_RSS2JSON_URL);
       const data = await res.json();
       if (data.status !== 'ok' || !Array.isArray(data.items)) {

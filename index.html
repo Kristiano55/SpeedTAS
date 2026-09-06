@@ -1616,6 +1616,23 @@
       return parseGvizResponse(response);
     }
 
+    /* Cloudflare Workers on the free plan cap each invocation at 50 outgoing
+       fetch() calls, so one Discord lookup per ID means the roster can't be
+       sent in a single request forever. Splitting into batches keeps each
+       request to the Worker safely under that limit, however large the
+       roster grows — it just becomes a few more sequential requests. */
+    async function fetchAvatarsInBatches(proxyUrl, ids, batchSize = 40) {
+      const avatars = {};
+      for (let i = 0; i < ids.length; i += batchSize) {
+        const batch = ids.slice(i, i + batchSize);
+        try {
+          const res = await fetch(proxyUrl + '/avatars?ids=' + encodeURIComponent(batch.join(',')));
+          if (res.ok) {const data = await res.json(); Object.assign(avatars, data.avatars || {});}
+        } catch (err) {console.warn('Avatar batch failed, continuing with the rest:', err);}
+      }
+      return avatars;
+    }
+
     async function loadDiscordProfiles() {
       try {
         const response = await fetchViaJSONP(PLAYER_SHEET_NAME);
@@ -1634,9 +1651,8 @@
         // player card (saved locally) — either source works here.
         const proxyUrl = (SPEEDTAS_API_URL || getAvatarProxyUrl() || '').replace(/\/+$/, '');
         if (proxyUrl && Object.keys(DISCORD_IDS).length) {
-          const ids = [...new Set(Object.values(DISCORD_IDS))].join(',');
-          const res = await fetch(proxyUrl + '/avatars?ids=' + encodeURIComponent(ids));
-          if (res.ok) {const data = await res.json(); DISCORD_AVATARS = data.avatars || {};}
+          const ids = [...new Set(Object.values(DISCORD_IDS))];
+          DISCORD_AVATARS = await fetchAvatarsInBatches(proxyUrl, ids);
         }
       } catch (err) {console.warn('Discord player directory unavailable:', err);}
     }

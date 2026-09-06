@@ -1616,6 +1616,18 @@
       return parseGvizResponse(response);
     }
 
+    /* Retries a flaky async call a few times with a short, growing pause
+       between attempts, instead of giving up after one failure. This is
+       what a manual page refresh was effectively doing by hand. */
+    async function retryAsync(fn, attempts = 3, delayMs = 1200) {
+      let lastErr;
+      for (let i = 0; i < attempts; i++) {
+        try { return await fn(); }
+        catch (err) { lastErr = err; if (i < attempts - 1) await new Promise(r => setTimeout(r, delayMs * (i + 1))); }
+      }
+      throw lastErr;
+    }
+
     /* Cloudflare Workers on the free plan cap each invocation at 50 outgoing
        fetch() calls, so one Discord lookup per ID means the roster can't be
        sent in a single request forever. Splitting into batches keeps each
@@ -1626,16 +1638,20 @@
       for (let i = 0; i < ids.length; i += batchSize) {
         const batch = ids.slice(i, i + batchSize);
         try {
-          const res = await fetch(proxyUrl + '/avatars?ids=' + encodeURIComponent(batch.join(',')));
-          if (res.ok) {const data = await res.json(); Object.assign(avatars, data.avatars || {});}
-        } catch (err) {console.warn('Avatar batch failed, continuing with the rest:', err);}
+          const data = await retryAsync(async () => {
+            const res = await fetch(proxyUrl + '/avatars?ids=' + encodeURIComponent(batch.join(',')));
+            if (!res.ok) throw new Error('Worker responded with ' + res.status);
+            return res.json();
+          });
+          Object.assign(avatars, data.avatars || {});
+        } catch (err) {console.warn('Avatar batch failed after retries, continuing with the rest:', err);}
       }
       return avatars;
     }
 
     async function loadDiscordProfiles() {
       try {
-        const response = await fetchViaJSONP(PLAYER_SHEET_NAME);
+        const response = await retryAsync(() => fetchViaJSONP(PLAYER_SHEET_NAME));
         const table = response?.table;
         const labels = (table?.cols || []).map(c => String(c?.label || '').trim().toLowerCase());
         // Accepts the real sheet headers ("Players" / "Id") as well as the

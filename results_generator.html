@@ -136,6 +136,32 @@ textarea#output{height:340px;font-family:'JetBrains Mono',monospace;font-size:12
 <script>
 let currentRoster = [];
 
+/** Sheet name -> TMTAS Exchange username, for players whose exchange
+ *  username doesn't match what's used on Discord/the sheet. Edit this
+ *  list directly whenever you spot a mismatch in the console log or a
+ *  blank time — one-time per player, not per edition. Anyone not listed
+ *  here just falls back to matching on their sheet name directly (which
+ *  is why e.g. "Sneak" needs no entry at all).
+ *
+ *  Filled in from edition 30's results as a starting point — the ones
+ *  marked "guess" weren't 100% certain from that data alone, so double
+ *  check those against the actual TMTAS Exchange profile before trusting
+ *  them for real.
+ */
+const EXCHANGE_ALIASES = {
+  'Midnight': 'MidnightEuphoria',
+  'Caleb': 'CA1EBYT',
+  'QQ': 'QQ_kewkew',
+  'Elliot': 'Elliott',
+  'Exix': 'exix77',
+  'LilDemo': 'LittleD3m0', // guess — confirm this is the right person
+  // 'SheetName': 'NicoReborn', // unmatched in edition 30 — add once you know who this is
+};
+const EXCHANGE_ALIASES_NORM = {};
+Object.entries(EXCHANGE_ALIASES).forEach(([sheetName, alias])=>{
+  EXCHANGE_ALIASES_NORM[sheetName] = alias; // keyed by exact sheet name; normalized at lookup time
+});
+
 function cfg(){
   return {
     sheetId: document.getElementById('cfgSheetId').value.trim(),
@@ -368,8 +394,8 @@ async function generate(){
     const byExchangeName = {};
     entries.forEach(e=>{
       const info = players[e.name];
-      const key = normalizeName((info && info.alias) || e.name);
-      byExchangeName[key] = e;
+      const alias = (info && info.alias) || EXCHANGE_ALIASES_NORM[e.name] || e.name;
+      byExchangeName[normalizeName(alias)] = e;
     });
     console.log('[SpeedTAS] entrants from event page:', results.map(r=>r.entrant));
     console.log('[SpeedTAS] roster names from sheet:', entries.map(e=>e.name));

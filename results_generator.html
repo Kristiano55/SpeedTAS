@@ -318,7 +318,7 @@ async function generate(){
 
     setStatus('Locating this edition on TMTAS Exchange...');
     const base = c.workerBase.replace(/\/$/,'');
-    const findUrl = `${base}/find-event?edition=${editionNum}&category=SpeedTAS`;
+    const findUrl = `${base}/find-event?edition=${editionNum}&category=${encodeURIComponent('SpeedTAS Season2')}`;
     const findRes = await retryAsync(()=>fetch(findUrl).then(async r=>{
       const data = await r.json().catch(()=>null);
       if(!data) throw new Error(`HTTP ${r.status} from /find-event \u2014 is the Worker deployed with this route?`);

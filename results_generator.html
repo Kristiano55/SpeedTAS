@@ -96,6 +96,10 @@ textarea#output{height:340px;font-family:'JetBrains Mono',monospace;font-size:12
     <div class="hint" style="padding-bottom:12px">
       The TMTAS Exchange event is found automatically by edition number &mdash; nothing to maintain there.
       Placements and Players tabs must be published to web (File &rarr; Share &rarr; Publish to web &rarr; CSV).
+      For times to auto-fill, add an optional column to the Players tab with "TMX" (or "Exchange"/"Alias") in
+      the header, containing each player's TMTAS Exchange username where it differs from their sheet name.
+      One-time per player, not per edition &mdash; anyone without a row there still works, their time just
+      won't auto-fill until it's added.
     </div>
   </details>
 
@@ -211,13 +215,15 @@ function parsePlayers(rows){
   const header = rows[0].map(h=>(h||'').trim().toLowerCase());
   let idCol = header.findIndex(h=>h.includes('id'));
   if(idCol===-1) idCol=1;
+  const aliasCol = header.findIndex(h=>h.includes('tmx')||h.includes('exchange')||h.includes('alias'));
   const map={};
   for(let r=1;r<rows.length;r++){
     const row=rows[r];
     if(!row || !row[0]) continue;
     const name=row[0].trim();
     const id=(row[idCol]||'').trim();
-    if(name) map[name]=id;
+    const alias=aliasCol>=0 ? (row[aliasCol]||'').trim() : '';
+    if(name) map[name]={ id, alias };
   }
   return map;
 }
@@ -319,7 +325,7 @@ async function generate(){
         name,
         place: parseInt(place,10),
         time: '',
-        discordId: players[name] || ''
+        discordId: (players[name] && players[name].id) || ''
       }))
       .filter(e=>!isNaN(e.place))
       .sort((a,b)=>a.place-b.place);
@@ -355,18 +361,25 @@ async function generate(){
     if(res.error) throw new Error(res.error);
     const results = res.results || [];
 
-    const byName = {};
-    results.forEach(r=>{ byName[normalizeName(r.entrant)] = r.time; });
+    // Match by alias (a player's TMTAS Exchange username, if set in the
+    // Players tab) first, falling back to their sheet name directly — that
+    // fallback is what lets players whose exchange username happens to
+    // equal their sheet name (e.g. "Sneak") match with zero setup.
+    const byExchangeName = {};
+    entries.forEach(e=>{
+      const info = players[e.name];
+      const key = normalizeName((info && info.alias) || e.name);
+      byExchangeName[key] = e;
+    });
     console.log('[SpeedTAS] entrants from event page:', results.map(r=>r.entrant));
     console.log('[SpeedTAS] roster names from sheet:', entries.map(e=>e.name));
 
-    let filled = 0;
-    const unmatched = [];
-    entries.forEach(e=>{
-      const t = byName[normalizeName(e.name)];
-      if(t){ e.time = t; filled++; }
-      else unmatched.push(e.name);
+    results.forEach(r=>{
+      const match = byExchangeName[normalizeName(r.entrant)];
+      if(match) match.time = r.time;
     });
+    const filled = entries.filter(e=>e.time).length;
+    const unmatched = entries.filter(e=>!e.time).map(e=>e.name);
 
     currentRoster = entries;
     renderRoster(entries);

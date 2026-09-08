@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SpeedTAS Results Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0b0b0d;color:#e8e8ea;font-family:'Space Grotesk',sans-serif;min-height:100vh;display:flex;justify-content:center;padding:32px 16px}
+.wrap{width:100%;max-width:680px}
+.top{display:flex;align-items:baseline;gap:10px;margin-bottom:4px}
+.logo{font-size:24px;font-weight:600;letter-spacing:-0.5px;color:#fff}
+.logo span{color:#f97316}
+.sub{font-size:13px;color:#66667a;margin-bottom:24px}
+
+.card{background:#1a1a1e;border:0.5px solid #2a2a32;border-radius:12px;padding:20px 22px;margin-bottom:16px}
+
+details.cfg{background:#141418;border:0.5px solid #24242c;border-radius:10px;padding:2px 16px;margin-bottom:16px}
+details.cfg summary{cursor:pointer;font-size:12px;color:#8a8a9a;padding:10px 0;list-style:none;display:flex;align-items:center;gap:6px}
+details.cfg summary::-webkit-details-marker{display:none}
+details.cfg summary::before{content:'\2699';font-size:12px}
+.cfg-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-bottom:14px}
+.cfg-grid label{font-size:11px;color:#55556a;display:block;margin-bottom:4px}
+.cfg-grid input{width:100%}
+
+label.fl{font-size:12px;color:#9999a8;display:block;margin-bottom:5px}
+input,textarea{background:#141418;border:0.5px solid #2e2e3c;color:#e8e8f0;border-radius:7px;padding:9px 12px;font-size:14px;font-family:inherit;width:100%}
+input:focus,textarea:focus{outline:none;border-color:#f97316}
+
+.row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.row .fld{flex:1;min-width:160px}
+.row .fld.narrow{flex:0 0 130px;min-width:0}
+
+button{background:#f97316;color:#181109;border:none;border-radius:7px;padding:11px 20px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;transition:filter .15s;width:100%}
+button:hover{filter:brightness(1.08)}
+button:active{filter:brightness(0.92)}
+button.secondary{background:#242430;color:#c8c8d4;width:auto;padding:8px 14px;font-size:12.5px}
+button:disabled{opacity:.45;cursor:default;filter:none}
+
+.status{font-size:12.5px;color:#66667a;margin-top:12px;line-height:1.5}
+.status.err{color:#f87171}
+.status.ok{color:#34d399}
+.status.warn{color:#fbbf24}
+
+.section-title{font-size:11px;font-weight:500;color:#66667a;text-transform:uppercase;letter-spacing:.6px;margin:20px 0 10px}
+
+table.rt{width:100%;border-collapse:collapse;font-size:13px}
+table.rt th{font-size:10.5px;color:#55556a;text-transform:uppercase;letter-spacing:.5px;text-align:left;padding:5px 6px;border-bottom:0.5px solid #26262e}
+table.rt td{padding:5px 6px;border-bottom:0.5px solid #1e1e24;vertical-align:middle}
+table.rt td.rk{color:#f97316;font-weight:600;width:34px}
+table.rt td.nm{color:#e8e8f0;white-space:nowrap}
+table.rt input{padding:5px 8px;font-size:12.5px}
+table.rt td.idc{width:170px}
+table.rt td.tmc{width:80px}
+
+.out-wrap{position:relative;margin-top:8px}
+textarea#output{height:340px;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.6;resize:vertical;white-space:pre}
+.copy-btn{position:absolute;top:10px;right:10px}
+
+.hint{font-size:11.5px;color:#4d4d5c;margin-top:10px;line-height:1.5}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top"><div class="logo">Speed<span>TAS</span></div></div>
+  <div class="sub">Type the edition and clip link &mdash; placements, Discord IDs and times are all pulled automatically.</div>
+
+  <details class="cfg">
+    <summary>Advanced settings (one-time setup)</summary>
+    <div class="cfg-grid">
+      <div>
+        <label>Google Sheet ID</label>
+        <input id="cfgSheetId" value="1g7M1IWvDlqmUkUWB6oSX-HKf7tCpAmaQK_nvNGBEppw">
+      </div>
+      <div>
+        <label>Discord role ID to ping</label>
+        <input id="cfgRoleId" value="1378340597223653517">
+      </div>
+      <div>
+        <label>Placements tab name</label>
+        <input id="cfgPlacementsTab" value="Editions">
+      </div>
+      <div>
+        <label>Players tab name</label>
+        <input id="cfgPlayersTab" value="Players">
+      </div>
+      <div>
+        <label>Worker base URL</label>
+        <input id="cfgWorkerBase" value="https://speedtas-api.kristianogeorgiev652.workers.dev">
+      </div>
+    </div>
+    <div class="hint" style="padding-bottom:12px">
+      The TMTAS Exchange event is found automatically by edition number &mdash; nothing to maintain there.
+      Placements and Players tabs must be published to web (File &rarr; Share &rarr; Publish to web &rarr; CSV).
+    </div>
+  </details>
+
+  <div class="card">
+    <div class="row" style="margin-bottom:0">
+      <div class="fld narrow">
+        <label class="fl">Edition #</label>
+        <input id="editionNum" type="number" min="1" placeholder="e.g. 27">
+      </div>
+      <div class="fld">
+        <label class="fl">Clip link</label>
+        <input id="clipLink" placeholder="https://medal.tv/games/...">
+      </div>
+    </div>
+    <button id="genBtn" onclick="generate()">Generate results post</button>
+    <div id="status" class="status"></div>
+
+    <div id="reviewBlock" class="hidden">
+      <div class="section-title">Quick check &mdash; edit anything that's off</div>
+      <table class="rt">
+        <thead><tr><th>#</th><th>Player</th><th>Discord ID</th><th>Time</th></tr></thead>
+        <tbody id="rosterBody"></tbody>
+      </table>
+    </div>
+
+    <div class="out-wrap">
+      <textarea id="output" readonly placeholder="Your formatted results message will appear here..."></textarea>
+      <button class="copy-btn secondary" onclick="copyOutput()">Copy</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let currentRoster = [];
+
+function cfg(){
+  return {
+    sheetId: document.getElementById('cfgSheetId').value.trim(),
+    roleId: document.getElementById('cfgRoleId').value.trim(),
+    placementsTab: document.getElementById('cfgPlacementsTab').value.trim(),
+    playersTab: document.getElementById('cfgPlayersTab').value.trim(),
+    workerBase: document.getElementById('cfgWorkerBase').value.trim()
+  };
+}
+
+function setStatus(msg, kind){
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = 'status' + (kind ? ' ' + kind : '');
+}
+
+async function retryAsync(fn, attempts=3, delay=1200){
+  let lastErr;
+  for (let i=0;i<attempts;i++){
+    try { return await fn(); }
+    catch(e){ lastErr=e; if(i<attempts-1) await new Promise(r=>setTimeout(r,delay)); }
+  }
+  throw lastErr;
+}
+
+function parseCSV(text){
+  const rows=[]; let row=[], field='', inQuotes=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(inQuotes){
+      if(c==='"'){ if(text[i+1]==='"'){field+='"';i++;} else inQuotes=false; }
+      else field+=c;
+    } else {
+      if(c==='"') inQuotes=true;
+      else if(c===','){ row.push(field); field=''; }
+      else if(c==='\n'){ row.push(field); rows.push(row); row=[]; field=''; }
+      else if(c==='\r'){ /* skip */ }
+      else field+=c;
+    }
+  }
+  if(field.length||row.length){ row.push(field); rows.push(row); }
+  return rows.filter(r=>r.some(c=>c!==''));
+}
+
+async function fetchSheetCSV(sheetId, tabName){
+  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tabName)}`;
+  const res = await fetch(url);
+  if(!res.ok) throw new Error(`Couldn't load tab "${tabName}" (HTTP ${res.status}). Check the tab name and that it's published to web.`);
+  const text = await res.text();
+  if(text.trim().startsWith('<')) throw new Error(`Tab "${tabName}" isn't published to web (got an HTML error page instead of CSV).`);
+  return parseCSV(text);
+}
+
+function parsePivot(rows){
+  if(!rows.length) return {};
+  const header = rows[0];
+  const players = header.slice(1).map(h=>(h||'').trim());
+  const editions = {};
+  for(let r=1;r<rows.length;r++){
+    const row = rows[r];
+    if(!row || !row[0]) continue;
+    const m = String(row[0]).match(/\d+/);
+    if(!m) continue;
+    const editionNum = parseInt(m[0],10);
+    const values = {};
+    players.forEach((p,idx)=>{
+      const v = row[idx+1];
+      if(p && v!==undefined && String(v).trim()!=='') values[p]=String(v).trim();
+    });
+    editions[editionNum]=values;
+  }
+  return editions;
+}
+
+function parsePlayers(rows){
+  if(!rows.length) return {};
+  const header = rows[0].map(h=>(h||'').trim().toLowerCase());
+  let idCol = header.findIndex(h=>h.includes('id'));
+  if(idCol===-1) idCol=1;
+  const map={};
+  for(let r=1;r<rows.length;r++){
+    const row=rows[r];
+    if(!row || !row[0]) continue;
+    const name=row[0].trim();
+    const id=(row[idCol]||'').trim();
+    if(name) map[name]=id;
+  }
+  return map;
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+const DIGIT_EMOJI = ['0\uFE0F\u20E3','1\uFE0F\u20E3','2\uFE0F\u20E3','3\uFE0F\u20E3','4\uFE0F\u20E3','5\uFE0F\u20E3','6\uFE0F\u20E3','7\uFE0F\u20E3','8\uFE0F\u20E3','9\uFE0F\u20E3'];
+function rankEmoji(n){
+  if(n===1) return '\uD83E\uDD47';
+  if(n===2) return '\uD83E\uDD48';
+  if(n===3) return '\uD83E\uDD49';
+  if(n===10) return '\uD83D\uDD1F';
+  if(n<=9) return DIGIT_EMOJI[n];
+  return String(n).split('').map(d=>DIGIT_EMOJI[+d]).join(' ');
+}
+
+function ordinal(n){
+  const s=['th','st','nd','rd'], v=n%100;
+  return n + (s[(v-20)%10] || s[v] || s[0]);
+}
+
+function buildMessage(){
+  if(!currentRoster.length) return;
+  const editionNum = parseInt(document.getElementById('editionNum').value,10);
+  const clip = document.getElementById('clipLink').value.trim();
+  const c = cfg();
+
+  const lines = [];
+  lines.push(`# \uD83C\uDFC1  Results of the ${ordinal(editionNum)} SpeedTAS competition \uD83C\uDFC1`);
+  currentRoster.forEach(e=>{
+    const who = e.discordId ? `<@${e.discordId}>` : e.name;
+    const time = e.time ? ` ${e.time}` : '';
+    lines.push(`${rankEmoji(e.place)}${who}${time}`);
+  });
+  lines.push('Thank you for competing!');
+  lines.push('See you next week!');
+  lines.push(`${c.roleId ? `<@&${c.roleId}> : ` : ''}${clip || '[clip link]'}`);
+
+  document.getElementById('output').value = lines.join('\n');
+}
+
+function renderRoster(entries){
+  const tbody = document.getElementById('rosterBody');
+  tbody.innerHTML = entries.map((e,i)=>`
+    <tr>
+      <td class="rk">${e.place}</td>
+      <td class="nm">${escapeHtml(e.name)}</td>
+      <td class="idc"><input data-idx="${i}" data-field="discordId" value="${escapeHtml(e.discordId)}" placeholder="Discord ID"></td>
+      <td class="tmc"><input data-idx="${i}" data-field="time" value="${escapeHtml(e.time)}" placeholder="time"></td>
+    </tr>
+  `).join('');
+  tbody.querySelectorAll('input').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      const idx = +inp.dataset.idx, field = inp.dataset.field;
+      currentRoster[idx][field] = inp.value.trim();
+      buildMessage();
+    });
+  });
+  document.getElementById('reviewBlock').classList.remove('hidden');
+}
+
+async function generate(){
+  const c = cfg();
+  const editionNum = parseInt(document.getElementById('editionNum').value,10);
+  if(!editionNum){ setStatus('Enter a valid edition number.','err'); return; }
+  if(!c.sheetId || !c.workerBase){ setStatus('Sheet ID / Worker base URL missing in advanced settings.','err'); return; }
+
+  const btn = document.getElementById('genBtn');
+  btn.disabled = true;
+  document.getElementById('reviewBlock').classList.add('hidden');
+  document.getElementById('output').value = '';
+  setStatus('Fetching sheet data...');
+
+  try {
+    const [placementRows, playerRows] = await Promise.all([
+      retryAsync(()=>fetchSheetCSV(c.sheetId, c.placementsTab)),
+      retryAsync(()=>fetchSheetCSV(c.sheetId, c.playersTab))
+    ]);
+
+    const placements = parsePivot(placementRows)[editionNum] || {};
+    const players = parsePlayers(playerRows);
+
+    const entries = Object.entries(placements)
+      .map(([name,place])=>({
+        name,
+        place: parseInt(place,10),
+        time: '',
+        discordId: players[name] || ''
+      }))
+      .filter(e=>!isNaN(e.place))
+      .sort((a,b)=>a.place-b.place);
+
+    if(!entries.length){
+      throw new Error(`No placements found for edition ${editionNum} on tab "${c.placementsTab}".`);
+    }
+
+    setStatus('Locating this edition on TMTAS Exchange...');
+    const base = c.workerBase.replace(/\/$/,'');
+    const findUrl = `${base}/find-event?edition=${editionNum}&category=SpeedTAS`;
+    const findRes = await retryAsync(()=>fetch(findUrl).then(r=>r.json()), 2, 800);
+    if(findRes.error){
+      currentRoster = entries;
+      renderRoster(entries);
+      buildMessage();
+      setStatus(`Placements and Discord IDs filled in below, but couldn't auto-locate the event: ${findRes.error}`, 'warn');
+      return;
+    }
+    const eventId = findRes.id;
+
+    setStatus(`Found "${findRes.title}" (event ${eventId}) \u2014 loading times...`);
+    const resultsUrl = `${base}/event-results?id=${encodeURIComponent(eventId)}`;
+    const res = await retryAsync(()=>fetch(resultsUrl).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }));
+    if(res.error) throw new Error(res.error);
+    const results = res.results || [];
+
+    const byName = {};
+    results.forEach(r=>{ byName[String(r.entrant).toLowerCase()] = r.time; });
+
+    let filled = 0;
+    entries.forEach(e=>{
+      const t = byName[e.name.toLowerCase()];
+      if(t){ e.time = t; filled++; }
+    });
+
+    currentRoster = entries;
+    renderRoster(entries);
+    buildMessage();
+
+    const missingIds = entries.filter(e=>!e.discordId).length;
+    let note = `Done \u2014 ${entries.length} placements, ${filled} times filled from "${res.title || findRes.title}".`;
+    if(missingIds) note += ` ${missingIds} missing a Discord ID.`;
+    setStatus(note, filled===entries.length && !missingIds ? 'ok' : 'warn');
+  } catch(err){
+    setStatus('Error: ' + err.message, 'err');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function copyOutput(){
+  const ta = document.getElementById('output');
+  if(!ta.value) return;
+  navigator.clipboard.writeText(ta.value).then(()=>{
+    const btn = document.querySelector('.copy-btn');
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(()=>btn.textContent=orig, 1400);
+  });
+}
+
+document.getElementById('clipLink').addEventListener('input', buildMessage);
+</script>
+</body>
+</html>

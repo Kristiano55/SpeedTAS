@@ -2307,11 +2307,11 @@
 
     /* ============ RENDER: PLAYERS DIRECTORY ============ */
     function renderPlayers(seasonKey = 's2', season1Data = null) {
-      if ((seasonKey === 's1' || seasonKey === 'both') && !season1Data) {main.innerHTML = `<div class="loader"><div class="spinner"></div> Loading player directory…</div>`; loadSeason1().then(data => renderPlayers(seasonKey, data)); return;}
+      if ((seasonKey === 's1' || seasonKey === 'both') && !season1Data) {main.innerHTML = `<div class="loader"><div class="spinner"></div> Loading player directory…</div>`; loadSeason1().then(data => renderPlayers(seasonKey, data)).catch(err => {main.innerHTML = `<div class="panel"><h2 class="section-title">Season 1 unavailable</h2><p style="color:var(--muted)">${err.message}</p></div>`;}); return;}
       let ranked, label;
       if (seasonKey === 's1') {ranked = seasonStats(season1Data); label = 'Season 1';}
       else if (seasonKey === 'both') {
-        const rows = comparisonRows(season1Data, RAW);
+        const rows = comparisonRows(seasonStats(season1Data), seasonStats(RAW));
         ranked = rows.map(r => ({name: r.name, points: r.total, played: r.played, wins: r.wins, podiums: r.podiums})).sort((a, b) => b.points - a.points || b.wins - a.wins).map((p, i) => ({...p, rank: i + 1})); label = 'Both seasons';
       } else {ranked = seasonStats(RAW); label = 'Season 2';}
       const linkSeason = seasonKey === 'both' ? 'all' : seasonKey;
@@ -2442,7 +2442,7 @@
       const decoded = decodeURIComponent(name);
       if ((seasonKey === 's1' || seasonKey === 'all') && !season1Data) {
         main.innerHTML = `<div class="loader"><div class="spinner"></div> Loading player profile…</div>`;
-        loadSeason1().then(data => renderPlayerProfileEnhanced(decoded, seasonKey, data));
+        loadSeason1().then(data => renderPlayerProfileEnhanced(decoded, seasonKey, data)).catch(err => {main.innerHTML = `<div class="panel"><h2 class="section-title">Season 1 unavailable</h2><p style="color:var(--muted)">${err.message}</p></div>`;});
         return;
       }
       const s2 = profilePlayerFor(RAW, decoded), s1 = season1Data ? profilePlayerFor(season1Data, decoded) : null;
@@ -2452,7 +2452,7 @@
         if (!p1 && !p2) {main.innerHTML = `<div class="empty-state">Player "${decoded}" not found.</div>`; return;}
         history = [...(p1 ? p1.history.map(h => ({...h, edition: `S1 · ${h.edition}`})) : []), ...(p2 ? p2.history.map(h => ({...h, edition: `S2 · ${h.edition}`})) : [])];
         const points = (p1?.points || 0) + (p2?.points || 0), played = history.length, wins = (p1?.wins || 0) + (p2?.wins || 0), podiums = (p1?.podiums || 0) + (p2?.podiums || 0);
-        const placements = history.map(h => h.placement), allRows = comparisonRows(season1Data, RAW), own = allRows.find(r => r.key === playerKey((p2 || p1).name));
+        const placements = history.map(h => h.placement), allRows = comparisonRows(s1.computed.ranked, s2.computed.ranked), own = allRows.find(r => r.key === playerKey((p2 || p1).name));
         p = {name: (p2 || p1).name, points, played, wins, podiums, placements, best: Math.min(...placements), worst: Math.max(...placements), avgPlacement: placements.reduce((a, b) => a + b, 0) / played, winRate: wins / played, podiumRate: podiums / played, avgPoints: points / played, maxWinStreak: Math.max(p1?.maxWinStreak || 0, p2?.maxWinStreak || 0), maxPodiumStreak: Math.max(p1?.maxPodiumStreak || 0, p2?.maxPodiumStreak || 0), rank: own ? allRows.indexOf(own) + 1 : null, badges: []};
         profileName = p.name; rankLabel = 'All-time rank'; seasonLabel = 'All-time';
       } else {
@@ -2509,7 +2509,7 @@
     }
 
     function renderEditionDetail(editionId, seasonKey = 's2', data = RAW) {
-      if (seasonKey === 's1' && data === RAW) {main.innerHTML = `<div class="loader"><div class="spinner"></div> Loading Season 1 edition…</div>`; loadSeason1().then(s1 => renderEditionDetail(editionId, 's1', s1)); return;}
+      if (seasonKey === 's1' && data === RAW) {main.innerHTML = `<div class="loader"><div class="spinner"></div> Loading Season 1 edition…</div>`; loadSeason1().then(s1 => renderEditionDetail(editionId, 's1', s1)).catch(err => {main.innerHTML = `<div class="panel"><h2 class="section-title">Season 1 unavailable</h2><p style="color:var(--muted)">${err.message}</p></div>`;}); return;}
       const decoded = decodeURIComponent(editionId);
       const ed = data.editions.find(e => String(e.edition) === decoded);
       if (!ed) {main.innerHTML = `<div class="empty-state">Edition ${decoded} not found.</div>`; return;}

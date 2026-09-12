@@ -1825,13 +1825,32 @@
        Photos are resized client-side before saving so they stay small. */
     const AVATAR_KEY_PREFIX = 'speedtas_v1_avatar_';
 
+    /* avatarHTML() calls getAvatarOverride() once per player row - 50+ times
+       on a single Players directory render. Reading localStorage that many
+       times on every render adds up, so overrides are read into memory once
+       at init and kept in sync from there instead of re-reading storage on
+       every single card. */
+    let AVATAR_OVERRIDES_CACHE = {};
+    function loadAvatarOverridesCache() {
+      const cache = {};
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith(AVATAR_KEY_PREFIX) && key !== AVATAR_PROXY_KEY) {
+            cache[decodeURIComponent(key.slice(AVATAR_KEY_PREFIX.length))] = localStorage.getItem(key);
+          }
+        }
+      } catch (e) { /* localStorage unavailable - cache stays empty, falls through to Discord avatars */ }
+      AVATAR_OVERRIDES_CACHE = cache;
+    }
+
     function getAvatarOverride(name) {
-      try {const manual = localStorage.getItem(AVATAR_KEY_PREFIX + encodeURIComponent(name)); if (manual) return manual;} catch (e) { }
+      if (Object.prototype.hasOwnProperty.call(AVATAR_OVERRIDES_CACHE, name)) return AVATAR_OVERRIDES_CACHE[name];
       const key = playerKey(name);
       return DISCORD_AVATARS[DISCORD_IDS[key]] || null;
     }
     function saveAvatarOverride(name, dataUrl) {
-      try {localStorage.setItem(AVATAR_KEY_PREFIX + encodeURIComponent(name), dataUrl); return true;}
+      try {localStorage.setItem(AVATAR_KEY_PREFIX + encodeURIComponent(name), dataUrl); AVATAR_OVERRIDES_CACHE[name] = dataUrl; return true;}
       catch (e) {
         console.error('Could not save avatar:', e);
         alert("Couldn't save that photo — your browser's local storage may be full or restricted.");
@@ -1840,6 +1859,7 @@
     }
     function deleteAvatarOverride(name) {
       try {localStorage.removeItem(AVATAR_KEY_PREFIX + encodeURIComponent(name));} catch (e) { }
+      delete AVATAR_OVERRIDES_CACHE[name];
     }
 
     /* Optional: URL of a self-hosted Discord-ID-to-avatar lookup proxy (see
@@ -2012,7 +2032,7 @@
     }
     function avatarHTML(name, size) {
       const s = size || 32;
-      const photo = getAvatarOverride(name) || DISCORD_AVATARS[playerKey(name)];
+      const photo = getAvatarOverride(name);
       if (photo) {
         return `<img src="${photo}" alt="${name}" loading="lazy" onerror="handleAvatarError(this,'${encodeURIComponent(name)}')" style="width:${s}px;height:${s}px;border-radius:50%;object-fit:cover;flex-shrink:0;display:inline-block;vertical-align:middle;">`;
       }
@@ -2846,10 +2866,10 @@
       return true;
     }
     function seasonStats(data) {return computeAll(data).ranked;}
-    function rankMap(data, knownKeys = []) {const map = {}; seasonStats(data).forEach((p, i) => {let key = playerKey(p.name); if (!knownKeys.includes(key)) {const close = knownKeys.find(k => oneLetterApart(k, key)); if (close) key = close;} map[key] = {...p, rank: i + 1};}); return map;}
+    function rankMap(ranked, knownKeys = []) {const map = {}; ranked.forEach((p, i) => {let key = playerKey(p.name); if (!knownKeys.includes(key)) {const close = knownKeys.find(k => oneLetterApart(k, key)); if (close) key = close;} map[key] = {...p, rank: i + 1};}); return map;}
     function statCard(label, value, sub = '') {return `<div class="card"><div class="label">${label}</div><div class="value">${value}</div>${sub ? `<div class="sub">${sub}</div>` : ''}</div>`;}
-    function comparisonRows(s1, s2) {
-      const a = rankMap(s1), b = rankMap(s2, Object.keys(a)), keys = [...new Set([...Object.keys(a), ...Object.keys(b)])];
+    function comparisonRows(s1Ranked, s2Ranked) {
+      const a = rankMap(s1Ranked), b = rankMap(s2Ranked, Object.keys(a)), keys = [...new Set([...Object.keys(a), ...Object.keys(b)])];
       return keys.map(k => {
         const x = a[k], y = b[k];
         return {
@@ -2902,14 +2922,14 @@
     function renderSeasonCompare() {
       main.innerHTML = `<div class="loader"><div class="spinner"></div> Loading Season 1 comparison…</div>`;
       loadSeason1().then(s1 => {
-        const s2 = RAW, one = seasonStats(s1), two = seasonStats(s2), rows = comparisonRows(s1, s2);
+        const s2 = RAW, one = seasonStats(s1), two = seasonStats(s2), rows = comparisonRows(one, two);
         const shared = rows.filter(r => r.s1 && r.s2), newcomers = rows.filter(r => !r.s1 && r.s2), departed = rows.filter(r => r.s1 && !r.s2);
         const biggest = [...shared].sort((a, b) => (b.delta || 0) - (a.delta || 0))[0];
         const s1Leader = one[0], s2Leader = two[0];
         main.innerHTML = `
       <section><div class="season-intro"><h2 class="section-title">Season 1 ↔ Season 2</h2><p>Two seasons, one evolving field. Compare player results, participation and rank movement side by side.</p></div>
       <div class="compare-spotlight"><div class="compare-spotlight-card"><div class="kicker">Season leaders</div><b><strong>S1</strong> ${s1Leader?.name || '—'} <span style="color:var(--muted);font-size:13px;font-weight:500">${s1Leader?.points || 0} pts</span></b><b><strong>S2</strong> ${s2Leader?.name || '—'} <span style="color:var(--muted);font-size:13px;font-weight:500">${s2Leader?.points || 0} pts</span></b></div><div class="compare-spotlight-card compact"><div class="kicker">Returning</div><b>${shared.length}</b><span style="color:var(--muted);font-size:12px">players raced both</span></div></div>
-      <div class="grid cards">${statCard('Season 1', '67', 'editions · 56 registered players')}${statCard('Season 2', s2.editions.length, `editions · ${two.length} active players`)}${statCard('Biggest rank gain', biggest ? biggest.name : '—', biggest ? `▲ ${biggest.delta} · #${biggest.s1.rank} → #${biggest.s2.rank}` : 'No matched players')}</div></section>
+      <div class="grid cards">${statCard('Season 1', s1.editions.length, `editions · ${s1.players.length} registered players`)}${statCard('Season 2', s2.editions.length, `editions · ${two.length} active players`)}${statCard('Biggest rank gain', biggest ? biggest.name : '—', biggest ? `▲ ${biggest.delta} · #${biggest.s1.rank} → #${biggest.s2.rank}` : 'No matched players')}</div></section>
       <section class="panel"><h2 class="section-title">Player comparison</h2><p class="compare-hint">↑ Ascending · ↓ Descending · blank entries always remain at the bottom.</p><div id="comparisonTable"></div></section>`;
         renderComparisonTable(rows);
       }).catch(err => {main.innerHTML = `<div class="panel"><h2 class="section-title">Season 1 unavailable</h2><p style="color:var(--muted)">${err.message} Check that the Season 1 sheet remains published as CSV.</p></div>`;});
@@ -2917,7 +2937,7 @@
     function renderAllTime() {
       main.innerHTML = `<div class="loader"><div class="spinner"></div> Building all-time standings…</div>`;
       loadSeason1().then(s1 => {
-        const rows = comparisonRows(s1, RAW), s1Board = seasonStats(s1).slice(0, 25), s2Board = seasonStats(RAW).slice(0, 25);
+        const s1Ranked = seasonStats(s1), s2Ranked = seasonStats(RAW), rows = comparisonRows(s1Ranked, s2Ranked), s1Board = s1Ranked.slice(0, 25), s2Board = s2Ranked.slice(0, 25);
         const mixedBoard = rows.map(r => ({name: r.name, points: r.total, played: r.played, wins: r.wins, podiums: r.podiums})).sort((a, b) => b.points - a.points || b.wins - a.wins).slice(0, 25);
         const table = (board, label) => `<section class="panel"><h2 class="section-title">${label}</h2><div style="overflow:auto"><table class="data-table"><thead><tr><th>#</th><th>Player</th><th>Points</th><th>Played</th><th>Wins</th><th>Podiums</th></tr></thead><tbody>${board.map((p, i) => `<tr><td>${i + 1}</td><td><b>${p.name}</b></td><td style="color:var(--accent);font-weight:800">${p.points}</td><td>${p.played}</td><td>${p.wins}</td><td>${p.podiums}</td></tr>`).join('')}</tbody></table></div></section>`;
         main.innerHTML = `<section><h2 class="section-title">Season standings</h2><p style="color:var(--muted);margin:-4px 0 18px;">Season leaderboards remain separate. The all-time table adds both seasons after alias and one-letter name matching.</p><div class="grid cards">${statCard('Season 1', s1.editions.length, 'editions')}${statCard('Season 2', RAW.editions.length, 'editions')}${statCard('Players in both', rows.filter(r => r.s1 && r.s2).length, 'after alias matching')}</div></section><div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(420px,1fr));">${table(s1Board, 'Season 1 leaderboard')}${table(s2Board, 'Season 2 leaderboard')}${table(mixedBoard, 'All-time overall')}</div>`;
@@ -2967,11 +2987,32 @@
     searchInput.addEventListener('input', () => {
       const q = searchInput.value.trim().toLowerCase();
       if (!q || !RAW) {searchResults.style.display = 'none'; return;}
-      const playerMatches = RAW.players.filter(n => n.toLowerCase().includes(q)).slice(0, 6);
-      const editionMatches = RAW.editions.filter(e => String(e.edition).toLowerCase().includes(q)).slice(0, 4);
+
+      // SEASON_1 may not have finished its background preload yet - search
+      // just covers Season 2 until it has, then quietly starts covering both.
+      const s2Keys = new Set(RAW.players.map(playerKey));
+      const s1Keys = SEASON_1 ? new Set(SEASON_1.players.map(playerKey)) : new Set();
+      const nameByKey = {};
+      RAW.players.forEach(n => nameByKey[playerKey(n)] = n);
+      if (SEASON_1) SEASON_1.players.forEach(n => {if (!(playerKey(n) in nameByKey)) nameByKey[playerKey(n)] = n;});
+
+      const playerMatches = [...new Set([...s2Keys, ...s1Keys])]
+        .map(k => nameByKey[k])
+        .filter(n => n.toLowerCase().includes(q))
+        .slice(0, 6);
+
+      const editionMatches = [
+        ...RAW.editions.filter(e => String(e.edition).toLowerCase().includes(q)).map(e => ({edition: e.edition, season: 's2'})),
+        ...(SEASON_1 ? SEASON_1.editions.filter(e => String(e.edition).toLowerCase().includes(q)).map(e => ({edition: e.edition, season: 's1'})) : [])
+      ].slice(0, 4);
+
       const items = [
-        ...playerMatches.map(n => ({label: `👤 ${n}`, href: `#/player/${encodeURIComponent(n)}`})),
-        ...editionMatches.map(e => ({label: `🏁 Edition ${e.edition}`, href: `#/edition/${encodeURIComponent(e.edition)}`}))
+        ...playerMatches.map(n => {
+          const key = playerKey(n);
+          const season = s2Keys.has(key) && s1Keys.has(key) ? 'all' : (s1Keys.has(key) ? 's1' : 's2');
+          return {label: `👤 ${n}`, href: `#/player/${season}/${encodeURIComponent(n)}`};
+        }),
+        ...editionMatches.map(e => ({label: `🏁 Edition ${e.edition} (${e.season === 's1' ? 'S1' : 'S2'})`, href: `#/edition/${e.season}/${encodeURIComponent(e.edition)}`}))
       ];
       if (!items.length) {searchResults.style.display = 'none'; return;}
       searchResults.innerHTML = items.map(it => `<div data-href="${it.href}">${it.label}</div>`).join('');
@@ -3063,14 +3104,25 @@
 
     /* ============ INIT ============ */
     async function init() {
+      loadAvatarOverridesCache();
       main.innerHTML = `<div class="loader"><div class="spinner"></div> Loading SpeedTAS data...</div>`;
       const existingBanner = document.getElementById('statusBanner');
       if (existingBanner) existingBanner.remove();
       try {
         RAW = await loadData();
-        await loadDiscordProfiles();
         dataSourceStatus = 'live';
         render();
+        // Progressive enhancement, not blocking: avatarHTML() already has a
+        // colored-initials fallback, so there's no reason the leaderboard
+        // sits on a loading spinner for the whole (deliberately sequential,
+        // see fetchAvatarsInBatches) avatar fetch. Re-render whatever route
+        // is current once real avatars are in.
+        loadDiscordProfiles().then(() => render());
+        // Also warm the Season 1 cache in the background so it's likely
+        // ready by the time someone uses global search or visits a
+        // Season-1-aware page - loadSeason1() already caches its own result,
+        // so this costs nothing extra later.
+        loadSeason1().catch(err => console.warn('Background Season 1 preload failed (will retry when a page needs it):', err));
       } catch (err) {
         console.error('Live connection failed, using fallback snapshot:', err);
         try {

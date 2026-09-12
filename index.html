@@ -1383,15 +1383,16 @@
     const SHEET_NAME = "Editions";
     const PLAYER_SHEET_NAME = "Players"; // columns: Players, Id (the Discord ID)
     /* After deploying outputs/speedtas-api-worker.js, paste its public URL here.
-       It is safe to expose this URL; its Discord and YouTube keys stay in Worker secrets. */
+       Both seasons' Editions data (via /data), Discord avatars, and videos are
+       all proxied through it; its Discord and YouTube keys stay in Worker
+       secrets, never here. */
     const SPEEDTAS_API_URL = "https://speedtas-api.kristianogeorgiev652.workers.dev";
     const POINTS = {1: 10, 2: 7, 3: 6, 4: 5, 5: 4, 6: 3, 7: 2, 8: 1};
 
-    /* Snapshot of the real sheet, used as a fallback if the live browser
-       connection to Google Sheets can't be established (blocked by an
-       extension, firewall, or org policy). This is NOT kept in sync
-       automatically — use "Retry Live Connection" or the manual
-       paste/upload option to pull fresh data. */
+    /* Last-resort snapshot of the real sheet — used only if BOTH the Worker's
+       cached /data endpoint and a direct browser connection to Google Sheets
+       fail. This is NOT kept in sync automatically — use "Retry Live
+       Connection" or the manual paste/upload option to pull fresh data. */
     const FALLBACK_CSV_TEXT = `👥: 40,Vogtek,Sneak,Charlie,Magon,Exix,C4ster,Leva,Elliot,Galaxy,Skycrafter,Mufat,Lucy,Fabi,QQ,DeleteC,Crayhax,Thoman,Bedeux,Rio,IgntuL,Frusty,Oogy,NaiCou,Salty,Midnight,oeN,wasgud,Faiby,Caleb,Comfy,Kim,Qwerter,LilDemo,Timefall,Felipe,Meable,Viron,Infra,Adrien,7-n,Magnus,	casterjamar,Telve,Tizzan,Tejas,MigthBeJoe,Kram
 1,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 2,4,10,2,9,,8,6,,,3,,,,7,,,1,5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
@@ -1429,10 +1430,10 @@
 
     /* Season 1 is embedded so the comparison and all-time pages remain usable
        even when the published Google Sheet is unavailable. */
-    const SEASON_1_CSV_B64 = '8J+RpTogNTYsVGhvbWFuLE11ZmF0LERlbW8sbmFpQ291LHNlYmlrLEZhYXNxdWl0LFNreWNyYWZ0ZXIsRnJ1c3R5LFZvZ3RlayxUYWlscyxvYmJ5YmlnZmFzdCxMb2dvdXQsR2FsYXh5LENoYXJsaWUsRG9yYSxTdHVudGxvdmVyLE1hZ29uLHByb2RpaSxwZXRlcl9maWxlLEtyb2dudGVrLEJEY2FwLHNwZWN1bGFyLEdvbGRlbk93bCxCbGV2LENhMWViLEluZmVybm8sRmFiaSxJZ250dWwsSGFwcHksTWFnbnVzLEV4YSxDaGlja2VuLEpzYXAsQmFuYW5LaW5nLEtyaXN0aWFubyxLcmFtLEVsaW90LEFzcGhhbHQsVmVyc3RpYWwsUXdlcnRlcixWYWVseW5lLEZsdWZmeSxSaW8sQ29zdGNvLFRHaG9zdCxLYWtrZXIsRWRnZXdvcnQsRmFpYnksSHVxZXJ0LEV4aXgsQmVkZXV4LEFtYnJleSxWZXJ0ZXgsQ3JheWhheCxDYXN0ZXINCjIsMSwyLDMsNCw1LDYsNyw4LCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsDQozLDIsLDQsOCwsNSwzLDYsMSw3LDksMTAsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLA0KNCwsLCwyLCwsMSwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwNCjUsNSwxLDYsLCwsMywsMiwsLCw0LCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLA0KNiwzLDIsNSwsLDYsLCwxLCwsLDQsNyw4LCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwNCjcsLCwzLCwsLDUsLDEsLCwsMiw0LCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsDQo4LCwsLCwsMiwsLDEsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLA0KOSwsLDgsLCwzLDYsLDksNiwsLDEsMiwsNCw1LCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsDQoxMCwsLCwsLCwyLCwxLDMsLCwsNiwsNCwsNSw3LCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLA0KMTEsLCwsLCw3LDksLDEsNCwsLDIsLCwsNSwsNiwzLDgsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLA0KMTIsLCwsLCwsLCwxLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLA0KMTMsLCwsLCwsNywxLCwyLDQsLDgsMyw1LCwsNiwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLA0KMTQsNCwsLCwsLDEsLCwyLCwsLCwsLCwzLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLA0K';
     const SEASON_1_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT2PVKpC2mV_UWnXg6ouoPooQ6lgJlPLNIen11GniPy0q3m40b9CL_VTyhWP0V2cGEMItY7c75LLjZH/pub?output=csv';
-    /* Full Season 1 snapshot, compressed for a one-file dashboard fallback.
-       The live CSV above is always preferred; refresh the snapshot on a major
+    /* Full Season 1 snapshot, compressed for a one-file dashboard fallback —
+       only used if both the Worker's cached /data endpoint and the direct
+       published-CSV fetch above fail. Refresh the snapshot on a major
        correction by replacing this value with a fresh gzip+base64 export. */
     const SEASON_1_SNAPSHOT_GZIP = 'H4sIAAAAAAAACp1XS3LjNhDdowp3yAHewvyAkrKz5c/MOFOpZFzepiAZkliiSQ1IjqVj5ARZ5X45QqoBgqRMUiYHG1sS+/Xr1z/iv3/+/vfXX0SEp132KlN8LTeywK16zZDKeJmVyNUq3uNeyvx7GRf4tj+ttdwUSuNel3lxwnO2LdQeTzJOcmSr1WkVbzcyL/Bbts3KAg8ykccTljupk1jhNtMS34oyLZLsh9L4KrdZioPOXuIYB1Uo/dcmThQedbZNCfjmdi0PyA9qXSZS4yFLXlT6+1uCm0T9wFJ6aoXP6UbpNMO9XMX4vE2LMsEneTicCD4tc9wdJZa7eL1XKb7k8oAbmcr0MU63eNRxXsQyzfCo5SvukjgrcJ0fdjIp8Kw0/ZjgjzelKehnqZJTqnCflJvNCX/GGZZZXqwzPD3ssrzAo9zvlcbdy1a9ZbrAtd6rHPcyXp3wqfyudIG7Y3zEjXpR5RHXryutTuSnUEcstTzt5BFLmRdKc+bDg48AIQQizDDHxMNZAB8IyVIgQAQPMyzgXU1DCemPD8CbygCcCQh4iOhDYFEQTgKIQFEIwIAYCuEkNTibWeekggXwp3DgrPL1MxJwtgAMWdIfiyoIkxYxGqPOmE/GJpTI6CgwGwtRMacCgGfiN8kQBBWMkpMzz5iYM10IL3AMvCoDcwR1YkdihC5z5L9mE4y2rzUPQf1lBZgC0HD1rCmRmFmAcEQknHlNyqpc2p5otP3Afl6JH7qOsl4nlBPVZDtqwnMd8SENzvyrbgDje4ozvy4e808w2b7mGNpewoQckj09arzRZKry2KRxFETYDKNGMjunxgEIF6/paXfGE6CuddOscz6SkjPftKE1px0z7XDmuyoUJnMN75HNzJm/aPWyq4EJDIKr2oBWjGPQZIDWxAcQtZkTgGJqWc1NSiOamcMgjjXp0DMWiVBwQRfOAsfdWfvnlXA5O5wFZsVXAHYeOccNwiUKhEEattwjMvYtLQIDM7woOAuomaq95Jb9hMNZMHNG3lDolZpDAPPWoh7upQFBOQsWznPbeGQgnIVX5lk7G/pGQZ2Bfm6chV6ThqCHwEelEPpjWLfG9jtz871lMD19oa3/qnqnz5SwVYMXrGlg9dvX9XfGfvRMDWctDz2d3HCimdCLQAPDdU0PQosKzf8uCGehmzVnFdyE07YRfUOOM2HLEPAojBkiy7yjg6tQ83rp+fBojizgXhVruLomfQLpZqZ1oTDsFmZKzM46gDPhYohcOIR01iXO8UB+hfneDDLv4gv0QOlyJpq3nPpa8u4EXe8thTkTwuHbG1XnmPFXnfkARtSi2I2iBdq7BTgTtbhGiOFjbh0Nh9orZ8Jx60Gw6avP4rxW6D5WoXIm6MezmRkN5eFsrzbp4yzqXkgdiNcRyGHWNxiD4A3eSPwObtjW1YJzFg2Ouw5udzVwFgWjzZ3Y1e3BZoizaPgKcOmuVQXDWSSm3M2CMzY+BGdR1HoN64NoquTdyLGDbE4kZu6x9v7vn5ZUZF7nfYKzaN7aQDVPctntFGP9DjzE/w/aglbZEgAA';
     let SEASON_1 = null, season1Promise = null;
@@ -1444,10 +1445,30 @@
     }
     function loadSeason1() {
       if (SEASON_1) return Promise.resolve(SEASON_1);
-      if (!season1Promise) season1Promise = fetch(SEASON_1_CSV_URL)
-        .then(r => {if (!r.ok) throw new Error('Season 1 sheet could not be reached.'); return r.text();})
-        .then(text => SEASON_1 = parseDelimitedText(text))
-        .catch(async err => {console.warn('Season 1 live fetch failed; using saved snapshot.', err); return SEASON_1 = await loadSeason1Snapshot();});
+      if (!season1Promise) {
+        const proxyUrl = (SPEEDTAS_API_URL || '').replace(/\/+$/, '');
+        const viaWorker = proxyUrl
+          ? fetch(proxyUrl + '/data?season=s1').then(async r => {
+              if (!r.ok) {
+                let msg = `Worker responded with ${r.status}`;
+                try {const errBody = await r.json(); if (errBody && errBody.error) msg = errBody.error;} catch (e) {}
+                throw new Error(msg);
+              }
+              const payload = await r.json();
+              return {editions: payload.editions, players: payload.players};
+            })
+          : Promise.reject(new Error('No SPEEDTAS_API_URL configured.'));
+
+        season1Promise = viaWorker
+          .catch(err => {
+            console.warn('Season 1 via Worker failed; trying direct sheet fetch.', err);
+            return fetch(SEASON_1_CSV_URL)
+              .then(r => {if (!r.ok) throw new Error('Season 1 sheet could not be reached.'); return r.text();})
+              .then(text => parseDelimitedText(text));
+          })
+          .then(data => SEASON_1 = data)
+          .catch(async err => {console.warn('Season 1 live fetch failed; using saved snapshot.', err); return SEASON_1 = await loadSeason1Snapshot();});
+      }
       return season1Promise;
     }
 
@@ -1612,6 +1633,21 @@
     }
 
     async function loadData() {
+      const proxyUrl = (SPEEDTAS_API_URL || '').replace(/\/+$/, '');
+      if (proxyUrl) {
+        try {
+          const res = await fetch(proxyUrl + '/data?season=s2');
+          if (!res.ok) {
+            let msg = `Worker responded with ${res.status}`;
+            try {const errBody = await res.json(); if (errBody && errBody.error) msg = errBody.error;} catch (e) {}
+            throw new Error(msg);
+          }
+          const payload = await res.json();
+          return {editions: payload.editions, players: payload.players};
+        } catch (err) {
+          console.warn('Season 2 via Worker failed; trying direct Google Sheets connection.', err);
+        }
+      }
       const response = await fetchViaJSONP(SHEET_NAME);
       return parseGvizResponse(response);
     }
@@ -2258,7 +2294,8 @@
         const rows = comparisonRows(season1Data, RAW);
         ranked = rows.map(r => ({name: r.name, points: r.total, played: r.played, wins: r.wins, podiums: r.podiums})).sort((a, b) => b.points - a.points || b.wins - a.wins).map((p, i) => ({...p, rank: i + 1})); label = 'Both seasons';
       } else {ranked = seasonStats(RAW); label = 'Season 2';}
-      main.innerHTML = `<section><h2 class="section-title">Player Directory</h2><div class="filters"><button class="filter-btn ${seasonKey === 's2' ? 'active' : ''}" data-directory-season="s2">Season 2</button><button class="filter-btn ${seasonKey === 's1' ? 'active' : ''}" data-directory-season="s1">Season 1</button><button class="filter-btn ${seasonKey === 'both' ? 'active' : ''}" data-directory-season="both">Both</button></div><p style="color:var(--muted);font-size:13px;margin:-6px 0 16px;">${label} · ${ranked.length} player${ranked.length === 1 ? '' : 's'}</p><input id="dirSearch" placeholder="Filter players..." style="width:100%;max-width:320px;margin-bottom:18px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);outline:none;"><div class="directory" id="directoryGrid">${ranked.map((p, i) => `<a href="#/player/${encodeURIComponent(p.name)}" class="player-card-link" data-name="${p.name.toLowerCase()}"><div class="player-card" style="animation-delay:${Math.min(i, 25) * 0.02}s"><div style="margin:0 auto 10px;">${avatarHTML(p.name, 48)}</div><div class="pname">${p.name}</div><div class="pmeta">Rank #${p.rank} · ${p.points} pts</div></div></a>`).join('')}</div></section>`;
+      const linkSeason = seasonKey === 'both' ? 'all' : seasonKey;
+      main.innerHTML = `<section><h2 class="section-title">Player Directory</h2><div class="filters"><button class="filter-btn ${seasonKey === 's2' ? 'active' : ''}" data-directory-season="s2">Season 2</button><button class="filter-btn ${seasonKey === 's1' ? 'active' : ''}" data-directory-season="s1">Season 1</button><button class="filter-btn ${seasonKey === 'both' ? 'active' : ''}" data-directory-season="both">Both</button></div><p style="color:var(--muted);font-size:13px;margin:-6px 0 16px;">${label} · ${ranked.length} player${ranked.length === 1 ? '' : 's'}</p><input id="dirSearch" placeholder="Filter players..." style="width:100%;max-width:320px;margin-bottom:18px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);outline:none;"><div class="directory" id="directoryGrid">${ranked.map((p, i) => `<a href="#/player/${linkSeason}/${encodeURIComponent(p.name)}" class="player-card-link" data-name="${p.name.toLowerCase()}"><div class="player-card" style="animation-delay:${Math.min(i, 25) * 0.02}s"><div style="margin:0 auto 10px;">${avatarHTML(p.name, 48)}</div><div class="pname">${p.name}</div><div class="pmeta">Rank #${p.rank} · ${p.points} pts</div></div></a>`).join('')}</div></section>`;
       main.querySelectorAll('[data-directory-season]').forEach(btn => btn.addEventListener('click', () => renderPlayers(btn.dataset.directorySeason, season1Data)));
       document.getElementById('dirSearch').addEventListener('input', e => {const q = e.target.value.toLowerCase(); document.querySelectorAll('#directoryGrid .player-card-link').forEach(link => link.style.display = link.dataset.name.includes(q) ? '' : 'none');});
     }
@@ -2469,7 +2506,7 @@
           ${entries.map(([name, place], i) => `
             <tr class="row-anim" style="animation-delay:${i * 0.02}s">
               <td>${place <= 3 ? medalFor(place) : ''}${place}</td>
-              <td><a href="#/player/${encodeURIComponent(name)}"><div class="player-cell">${avatarHTML(name)}<b>${name}</b></div></a></td>
+              <td><a href="#/player/${seasonKey}/${encodeURIComponent(name)}"><div class="player-cell">${avatarHTML(name)}<b>${name}</b></div></a></td>
               <td style="color:var(--accent);font-weight:700;">${pointsFor(place)}</td>
             </tr>
           `).join('')}
@@ -2899,7 +2936,8 @@
         document.querySelector('nav a[data-route="/players"]').classList.add('active');
         renderPlayers();
       } else if (route[0] === 'player' && route[1]) {
-        renderPlayerProfileEnhanced(route[1]);
+        if ((route[1] === 's1' || route[1] === 's2' || route[1] === 'all') && route[2]) renderPlayerProfileEnhanced(route[2], route[1]);
+        else renderPlayerProfileEnhanced(route[1]);
       } else if (route[0] === 'history') {
         document.querySelector('nav a[data-route="/history"]').classList.add('active');
         renderHistory();

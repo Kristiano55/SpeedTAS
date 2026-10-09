@@ -1687,21 +1687,34 @@
 
     async function loadDiscordProfiles() {
       try {
-        const response = await retryAsync(() => fetchViaJSONP(PLAYER_SHEET_NAME));
-        const table = response?.table;
-        const labels = (table?.cols || []).map(c => String(c?.label || '').trim().toLowerCase());
-        // Accepts the real sheet headers ("Players" / "Id") as well as the
-        // older, more verbose variants, so nothing breaks if either is renamed.
-        const nameCol = labels.findIndex(x => x === 'players' || x === 'player' || x === 'player name' || x === 'name');
-        const idCol = labels.findIndex(x => x === 'id' || x === 'discord id' || x === 'discordid' || x === 'discord');
-        if (nameCol < 0 || idCol < 0) throw new Error('Players tab needs a name column ("Players") and an ID column ("Id").');
-        (table.rows || []).forEach(row => {const cells = (row.c || []).map(c => String(c?.v ?? '').trim()); const name = cells[nameCol], id = cells[idCol]; if (name && /^\d{15,25}$/.test(id)) DISCORD_IDS[playerKey(name)] = id;});
-        // Every player's ID is pulled from the sheet above in one pass — nobody
-        // has to enter IDs one at a time. This just needs a proxy URL to turn
-        // those IDs into images: either hardcode your deployed Worker's URL
-        // into SPEEDTAS_API_URL above, or set it once via the ⚙️ button on any
-        // player card (saved locally) — either source works here.
         const proxyUrl = (SPEEDTAS_API_URL || getAvatarProxyUrl() || '').replace(/\/+$/, '');
+        DISCORD_IDS = {};
+        // The Worker fetches the Players tab so public browsers never have
+        // to execute a Google JSONP script to build the avatar roster.
+        let rosterLoaded = false;
+        if (proxyUrl) {
+          try {
+            const response = await retryAsync(async () => {
+              const res = await fetch(proxyUrl + '/players');
+              if (!res.ok) throw new Error('Worker responded with ' + res.status);
+              return res.json();
+            });
+            Object.entries(response.players || {}).forEach(([name, id]) => {
+              if (/^\d{15,25}$/.test(String(id))) DISCORD_IDS[playerKey(name)] = String(id);
+            });
+            rosterLoaded = Object.keys(DISCORD_IDS).length > 0;
+          } catch (err) {console.warn('Worker Players endpoint unavailable; falling back to Google Sheets.', err);}
+        }
+        if (!rosterLoaded) {
+          // Compatibility fallback while the Worker update is being deployed.
+          const response = await retryAsync(() => fetchViaJSONP(PLAYER_SHEET_NAME));
+          const table = response?.table;
+          const labels = (table?.cols || []).map(c => String(c?.label || '').trim().toLowerCase());
+          const nameCol = labels.findIndex(x => ['players', 'player', 'player name', 'name'].includes(x));
+          const idCol = labels.findIndex(x => ['id', 'discord id', 'discordid', 'discord'].includes(x));
+          if (nameCol < 0 || idCol < 0) throw new Error('Players tab needs Player and Discord ID headers.');
+          (table.rows || []).forEach(row => {const cells = row.c || []; const name = String(cells[nameCol]?.v ?? '').trim(); const id = String(cells[idCol]?.f ?? cells[idCol]?.v ?? '').replace(/\s/g, ''); if (name && /^\d{15,25}$/.test(id)) DISCORD_IDS[playerKey(name)] = id;});
+        }
         if (proxyUrl && Object.keys(DISCORD_IDS).length) {
           const ids = [...new Set(Object.values(DISCORD_IDS))];
           DISCORD_AVATARS = await fetchAvatarsInBatches(proxyUrl, ids);
@@ -1846,8 +1859,8 @@
 
     function getAvatarOverride(name) {
       if (Object.prototype.hasOwnProperty.call(AVATAR_OVERRIDES_CACHE, name)) return AVATAR_OVERRIDES_CACHE[name];
-      const key = playerKey(name);
-      return DISCORD_AVATARS[DISCORD_IDS[key]] || null;
+      const id = discordIdFor(name);
+      return id ? (DISCORD_AVATARS[id] || null) : null;
     }
     function saveAvatarOverride(name, dataUrl) {
       try {localStorage.setItem(AVATAR_KEY_PREFIX + encodeURIComponent(name), dataUrl); AVATAR_OVERRIDES_CACHE[name] = dataUrl; return true;}
@@ -2858,6 +2871,14 @@
     /* ============ SEASON COMPARISON ============ */
     const PLAYER_ALIASES = {lildemo: 'demo', caster: 'c4ster', elliot: 'eliot'};
     const playerKey = name => PLAYER_ALIASES[name.toLowerCase().replace(/[^a-z0-9]/g, '')] || name.toLowerCase().replace(/[^a-z0-9]/g, '');
+    function discordIdFor(name) {
+      const key = playerKey(name);
+      if (DISCORD_IDS[key]) return DISCORD_IDS[key];
+      // Keep avatar matching consistent with the S1↔S2 identity rule for a
+      // one-character rename, while avoiding a match when it is ambiguous.
+      const close = Object.keys(DISCORD_IDS).filter(candidate => oneLetterApart(candidate, key));
+      return close.length === 1 ? DISCORD_IDS[close[0]] : null;
+    }
     function oneLetterApart(a, b) {
       if (a === b) return true;
       if (Math.abs(a.length - b.length) > 1) return false;

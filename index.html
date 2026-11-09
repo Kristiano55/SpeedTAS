@@ -9,6 +9,7 @@
   <style>
     :root {
       --accent: #e9fb59;
+      --accent-rgb: 233,251,89;
       --bg: #0a0a0c;
       --bg2: #121216;
       --card: #17171c;
@@ -21,6 +22,36 @@
       --bronze: #cd7f32;
       --radius: 16px;
     }
+
+    body.game-tm20 { --accent: #59d6fb; --accent-rgb: 89,214,251; }
+    .game-switch { display:inline-flex; gap:4px; padding:3px; border:1px solid var(--border); border-radius:999px; background:var(--card); }
+    .game-switch a { padding:5px 11px; border-radius:999px; font-size:13px; font-weight:700; color:var(--muted); text-decoration:none; letter-spacing:.3px; }
+    header { gap:12px !important; }
+    .search-wrap { min-width:0; }
+    .game-switch a:hover { color:var(--text); }
+    .game-switch a.active { background:var(--accent); color:#0a0a0c; }
+    /* TM2020 is a single running season: hide every Season 1 / Season 2 / Both picker and the TMNF-only pages */
+    body.game-tm20 [data-tmnf-only], body.game-tm20 #statusBanner,
+    body.game-tm20 .profile-season-tabs,
+    body.game-tm20 .filters:has([data-directory-season]), body.game-tm20 .filters:has([data-history-season]),
+    body.game-tm20 .season-picker:has([data-record-season]), body.game-tm20 .toolbar-label:has(+ .season-picker [data-record-season]),
+    body.game-tm20 .season-picker:has([data-rival-season]), body.game-tm20 .toolbar-label:has(+ .season-picker [data-rival-season]),
+    body.game-tm20 .season-picker:has([data-h2h-season]), body.game-tm20 .toolbar-label:has(+ .season-picker [data-h2h-season])
+    { display:none !important; }
+
+    .record-card.shared { border-color: rgba(var(--accent-rgb),.38); }
+    .record-card.shared:hover { transform:none; }
+    .record-shared-badge { display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:800; letter-spacing:.3px; color:var(--accent); background:rgba(var(--accent-rgb),.12); border:1px solid rgba(var(--accent-rgb),.3); margin-bottom:11px; }
+    .record-holders { display:flex; flex-wrap:wrap; gap:6px; }
+    .record-chip { display:inline-flex; align-items:center; gap:7px; padding:3px 11px 3px 3px; border-radius:999px; background:var(--bg2); border:1px solid var(--border); font-size:13px; font-weight:700; color:var(--text); text-decoration:none; }
+    .record-chip:hover { border-color:var(--accent); }
+    .record-chip.more { padding:5px 11px; color:var(--muted); }
+    .ext-link { display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:700; color:var(--accent); cursor:pointer; padding:3px 10px; border-radius:999px; border:1px solid rgba(var(--accent-rgb),.35); background:rgba(var(--accent-rgb),.08); text-decoration:none; }
+    .ext-link:hover { background:rgba(var(--accent-rgb),.2); }
+    .history-event { margin:2px 0 8px; min-height:0; }
+    .results-table.no-times .time-th, .results-table.no-times .time-cell { display:none; }
+    .time-cell { font-variant-numeric:tabular-nums; font-weight:700; }
+    .time-cell small { color:var(--muted); font-weight:600; margin-left:6px; }
 
     * {
       box-sizing: border-box;
@@ -75,7 +106,7 @@
       font-size: 20px;
       letter-spacing: .5px;
       color: var(--accent);
-      text-shadow: 0 0 20px rgba(233, 251, 89, .4);
+      text-shadow: 0 0 20px rgba(var(--accent-rgb), .4);
     }
 
     .discord-icon-link {
@@ -124,15 +155,15 @@
     }
 
     /* Records & rivalry hub */
-    .page-hero { position:relative; overflow:hidden; padding:28px; border:1px solid rgba(233,251,89,.28); border-radius:20px; background:linear-gradient(115deg,rgba(233,251,89,.11),rgba(89,214,251,.05) 46%,var(--card)); margin-bottom:22px; }
-    .page-hero::after { content:''; position:absolute; width:360px; height:360px; border-radius:50%; right:-160px; top:-210px; background:radial-gradient(circle,rgba(233,251,89,.2),transparent 65%); pointer-events:none; }
+    .page-hero { position:relative; overflow:hidden; padding:28px; border:1px solid rgba(var(--accent-rgb),.28); border-radius:20px; background:linear-gradient(115deg,rgba(var(--accent-rgb),.11),rgba(89,214,251,.05) 46%,var(--card)); margin-bottom:22px; }
+    .page-hero::after { content:''; position:absolute; width:360px; height:360px; border-radius:50%; right:-160px; top:-210px; background:radial-gradient(circle,rgba(var(--accent-rgb),.2),transparent 65%); pointer-events:none; }
     .page-hero > * { position:relative; z-index:1; }
     .eyebrow { color:var(--accent); text-transform:uppercase; font-size:11px; font-weight:800; letter-spacing:1.3px; margin-bottom:8px; }
     .page-hero h1 { margin:0; font-size:28px; letter-spacing:-.8px; }
     .page-hero p { color:var(--muted); max-width:720px; line-height:1.55; font-size:14px; margin:10px 0 0; }
     .compact-page-heading { margin:0 0 18px; }.compact-page-heading h1 { font-size:22px; margin:0; letter-spacing:-.4px; }.compact-page-heading p { color:var(--muted); font-size:13px; margin:6px 0 0; }
-    .history-header { display:flex; align-items:end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:16px; }.history-count{color:var(--muted);font-size:12px;padding:7px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:999px}.history-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(245px,1fr));gap:14px}.history-card{height:100%;position:relative;overflow:hidden;padding:17px;border:1px solid var(--border);border-radius:16px;background:var(--card);transition:.2s}.history-card:hover{transform:translateY(-3px);border-color:rgba(233,251,89,.45);box-shadow:0 14px 28px rgba(0,0,0,.25)}.history-card::after{content:'';position:absolute;width:130px;height:130px;border-radius:50%;right:-62px;top:-72px;background:radial-gradient(circle,rgba(233,251,89,.1),transparent 68%)}.history-card-top{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:800;letter-spacing:.8px}.history-edition{font-size:23px;font-weight:900;color:var(--text);letter-spacing:-.5px;margin:16px 0 14px}.history-winner{display:flex;align-items:center;gap:9px;padding:10px;border:1px solid var(--border);border-radius:12px;background:rgba(10,10,12,.3)}.history-winner-label{color:var(--muted);font-size:10px;text-transform:uppercase;font-weight:800;letter-spacing:.7px}.history-winner-name{font-size:13px;font-weight:800;margin-top:2px}.history-stats{display:flex;gap:16px;margin-top:15px;color:var(--muted);font-size:11px}.history-stats b{color:var(--text);font-size:14px;display:block;margin-top:3px}.history-open{position:absolute;right:17px;bottom:16px;color:var(--accent);font-size:12px;font-weight:800}
-    .race-header{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}.race-heading{display:flex;align-items:center;gap:13px}.race-edition-mark{width:45px;height:45px;border-radius:13px;display:grid;place-items:center;background:rgba(233,251,89,.12);border:1px solid rgba(233,251,89,.28);color:var(--accent);font-weight:900;font-size:16px}.race-heading h1{font-size:22px;margin:0;letter-spacing:-.5px}.race-heading p{color:var(--muted);font-size:12px;margin:4px 0 0}.race-podium{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}.race-podium-place{position:relative;overflow:hidden;min-height:132px;padding:16px;border:1px solid var(--border);border-radius:16px;background:var(--card)}.race-podium-place.gold{border-color:rgba(255,215,0,.45);background:linear-gradient(145deg,rgba(255,215,0,.13),var(--card) 68%)}.race-podium-place.silver{border-color:rgba(200,200,208,.3)}.race-podium-place.bronze{border-color:rgba(205,127,50,.32)}.race-place-label{color:var(--muted);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.75px}.race-podium-player{display:flex;align-items:center;gap:10px;margin-top:15px;font-weight:900}.race-podium-points{color:var(--accent);font-size:12px;font-weight:800;margin-top:10px}.results-panel{padding:12px 20px 8px}.results-panel-head{display:flex;justify-content:space-between;align-items:center;padding:4px 0 12px}.results-panel-head b{font-size:14px}.results-panel-head span{color:var(--muted);font-size:12px}.results-table tr:first-child td{background:rgba(255,215,0,.04)}.results-table td:first-child{font-weight:800}.results-table td:last-child{color:var(--accent);font-weight:800}
+    .history-header { display:flex; align-items:end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:16px; }.history-count{color:var(--muted);font-size:12px;padding:7px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:999px}.history-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(245px,1fr));gap:14px}.history-card{height:100%;position:relative;overflow:hidden;padding:17px;border:1px solid var(--border);border-radius:16px;background:var(--card);transition:.2s}.history-card:hover{transform:translateY(-3px);border-color:rgba(var(--accent-rgb),.45);box-shadow:0 14px 28px rgba(0,0,0,.25)}.history-card::after{content:'';position:absolute;width:130px;height:130px;border-radius:50%;right:-62px;top:-72px;background:radial-gradient(circle,rgba(var(--accent-rgb),.1),transparent 68%)}.history-card-top{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:800;letter-spacing:.8px}.history-edition{font-size:23px;font-weight:900;color:var(--text);letter-spacing:-.5px;margin:16px 0 14px}.history-winner{display:flex;align-items:center;gap:9px;padding:10px;border:1px solid var(--border);border-radius:12px;background:rgba(10,10,12,.3)}.history-winner-label{color:var(--muted);font-size:10px;text-transform:uppercase;font-weight:800;letter-spacing:.7px}.history-winner-name{font-size:13px;font-weight:800;margin-top:2px}.history-stats{display:flex;gap:16px;margin-top:15px;color:var(--muted);font-size:11px}.history-stats b{color:var(--text);font-size:14px;display:block;margin-top:3px}.history-open{position:absolute;right:17px;bottom:16px;color:var(--accent);font-size:12px;font-weight:800}
+    .race-header{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}.race-heading{display:flex;align-items:center;gap:13px}.race-edition-mark{width:45px;height:45px;border-radius:13px;display:grid;place-items:center;background:rgba(var(--accent-rgb),.12);border:1px solid rgba(var(--accent-rgb),.28);color:var(--accent);font-weight:900;font-size:16px}.race-heading h1{font-size:22px;margin:0;letter-spacing:-.5px}.race-heading p{color:var(--muted);font-size:12px;margin:4px 0 0}.race-podium{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}.race-podium-place{position:relative;overflow:hidden;min-height:132px;padding:16px;border:1px solid var(--border);border-radius:16px;background:var(--card)}.race-podium-place.gold{border-color:rgba(255,215,0,.45);background:linear-gradient(145deg,rgba(255,215,0,.13),var(--card) 68%)}.race-podium-place.silver{border-color:rgba(200,200,208,.3)}.race-podium-place.bronze{border-color:rgba(205,127,50,.32)}.race-place-label{color:var(--muted);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.75px}.race-podium-player{display:flex;align-items:center;gap:10px;margin-top:15px;font-weight:900}.race-podium-points{color:var(--accent);font-size:12px;font-weight:800;margin-top:10px}.results-panel{padding:12px 20px 8px}.results-panel-head{display:flex;justify-content:space-between;align-items:center;padding:4px 0 12px}.results-panel-head b{font-size:14px}.results-panel-head span{color:var(--muted);font-size:12px}.results-table tr:first-child td{background:rgba(255,215,0,.04)}.results-table td:first-child{font-weight:800}.results-table td:last-child{color:var(--accent);font-weight:800}
     .toolbar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:0 0 22px; }
     .toolbar-label { color:var(--muted); font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.8px; margin-right:2px; }
     .season-picker { display:flex; gap:6px; padding:4px; background:var(--bg2); border:1px solid var(--border); border-radius:12px; }
@@ -140,8 +171,8 @@
     .season-picker button.active { color:#10110c; background:var(--accent); }
     .record-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(235px,1fr)); gap:14px; }
     .record-card { position:relative; overflow:hidden; min-height:178px; padding:18px; background:var(--card); border:1px solid var(--border); border-radius:16px; transition:.2s; }
-    .record-card:hover { transform:translateY(-3px); border-color:rgba(233,251,89,.45); box-shadow:0 14px 30px rgba(0,0,0,.25); }
-    .record-icon { width:34px; height:34px; border-radius:10px; display:grid; place-items:center; background:rgba(233,251,89,.1); font-size:17px; margin-bottom:14px; }
+    .record-card:hover { transform:translateY(-3px); border-color:rgba(var(--accent-rgb),.45); box-shadow:0 14px 30px rgba(0,0,0,.25); }
+    .record-icon { width:34px; height:34px; border-radius:10px; display:grid; place-items:center; background:rgba(var(--accent-rgb),.1); font-size:17px; margin-bottom:14px; }
     .record-label { color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.7px; font-weight:800; }
     .record-value { color:var(--accent); font-size:30px; line-height:1.05; font-weight:900; margin:6px 0 9px; font-variant-numeric:tabular-nums; }
     .record-holder { display:flex; align-items:center; gap:9px; font-weight:800; font-size:14px; }
@@ -149,7 +180,7 @@
     .record-note { color:var(--muted); font-size:12px; margin-top:9px; }
     .rivalry-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:14px; }
     .rivalry-card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:16px; transition:.2s; }
-    .rivalry-card:hover { border-color:rgba(233,251,89,.42); transform:translateY(-2px); }
+    .rivalry-card:hover { border-color:rgba(var(--accent-rgb),.42); transform:translateY(-2px); }
     .rivalry-names { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:8px; font-weight:800; font-size:13px; }
     .rivalry-names .right { text-align:right; }
     .rivalry-score { font-size:21px; font-weight:900; color:var(--accent); font-variant-numeric:tabular-nums; white-space:nowrap; }
@@ -159,10 +190,10 @@
     .rivalry-meta { display:flex; justify-content:space-between; color:var(--muted); font-size:11px; }
     .rivalry-link { display:block; margin-top:13px; color:var(--accent); font-size:12px; font-weight:800; text-align:right; }
     .empty-state { padding:35px; border:1px dashed var(--border); border-radius:16px; color:var(--muted); text-align:center; }
-    .home-hero { position:relative; overflow:hidden; padding:28px; border:1px solid rgba(233,251,89,.25); border-radius:20px; background:linear-gradient(115deg,rgba(233,251,89,.12),rgba(89,214,251,.05) 52%,var(--card)); margin-bottom:18px; }
+    .home-hero { position:relative; overflow:hidden; padding:28px; border:1px solid rgba(var(--accent-rgb),.25); border-radius:20px; background:linear-gradient(115deg,rgba(var(--accent-rgb),.12),rgba(89,214,251,.05) 52%,var(--card)); margin-bottom:18px; }
     .home-hero::after { content:'⚡'; position:absolute; right:34px; top:-18px; font-size:170px; opacity:.07; color:var(--accent); transform:rotate(11deg); }
     .home-hero h1 { margin:0; font-size:30px; letter-spacing:-1px; }.home-hero p {color:var(--muted);margin:8px 0 0;font-size:14px;}.home-hero b{color:var(--accent)}
-    .recap-grid { display:grid; grid-template-columns:1.45fr repeat(3,1fr); gap:14px; }.recap-card { position:relative; overflow:hidden; background:linear-gradient(145deg,var(--card),#141419); border:1px solid var(--border); border-radius:16px; padding:17px; min-height:142px; }.recap-card:not(.featured)::after{content:'';position:absolute;width:100px;height:100px;border-radius:50%;right:-52px;bottom:-58px;background:radial-gradient(circle,rgba(89,214,251,.1),transparent 68%)}.recap-card.featured{border-color:rgba(233,251,89,.5);background:linear-gradient(135deg,rgba(233,251,89,.16),rgba(233,251,89,.035) 48%,var(--card));}.recap-card.featured::after{content:'🏆';position:absolute;right:14px;bottom:-18px;font-size:82px;opacity:.09}.recap-kicker{position:relative;z-index:1;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.85px;font-weight:800;margin-bottom:12px}.recap-title{position:relative;z-index:1;font-size:17px;font-weight:900;line-height:1.2}.recap-detail{position:relative;z-index:1;color:var(--muted);font-size:12px;margin-top:7px;line-height:1.45}.recap-link{position:relative;z-index:1;color:var(--accent);font-size:12px;font-weight:800;display:block;margin-top:13px}.recap-winner{position:relative;z-index:1;display:flex;align-items:center;gap:10px}.recap-winner .avatar,.recap-winner img{width:38px!important;height:38px!important;font-size:13px!important;box-shadow:0 0 0 2px rgba(233,251,89,.25)}.recap-winner-points{color:var(--accent);font-size:11px;font-weight:800;margin-top:3px}.recap-podium{position:relative;z-index:1;display:grid;gap:7px}.recap-podium-row{display:flex;align-items:center;gap:7px;color:var(--text);font-size:12px;font-weight:700}.recap-podium-row .avatar,.recap-podium-row img{width:23px!important;height:23px!important;font-size:8px!important}.recap-place{width:20px;color:var(--muted);font-size:10px}.recap-move{position:relative;z-index:1;display:flex;align-items:baseline;gap:7px}.recap-move strong{font-size:25px;color:#59fba0;letter-spacing:-1px}.recap-move span{font-size:12px;color:var(--muted)}.recap-debuts{position:relative;z-index:1;display:flex;align-items:center;gap:7px;flex-wrap:wrap}.recap-debuts .avatar,.recap-debuts img{width:27px!important;height:27px!important;font-size:9px!important}
+    .recap-grid { display:grid; grid-template-columns:1.45fr repeat(3,1fr); gap:14px; }.recap-card { position:relative; overflow:hidden; background:linear-gradient(145deg,var(--card),#141419); border:1px solid var(--border); border-radius:16px; padding:17px; min-height:142px; }.recap-card:not(.featured)::after{content:'';position:absolute;width:100px;height:100px;border-radius:50%;right:-52px;bottom:-58px;background:radial-gradient(circle,rgba(89,214,251,.1),transparent 68%)}.recap-card.featured{border-color:rgba(var(--accent-rgb),.5);background:linear-gradient(135deg,rgba(var(--accent-rgb),.16),rgba(var(--accent-rgb),.035) 48%,var(--card));}.recap-card.featured::after{content:'🏆';position:absolute;right:14px;bottom:-18px;font-size:82px;opacity:.09}.recap-kicker{position:relative;z-index:1;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.85px;font-weight:800;margin-bottom:12px}.recap-title{position:relative;z-index:1;font-size:17px;font-weight:900;line-height:1.2}.recap-detail{position:relative;z-index:1;color:var(--muted);font-size:12px;margin-top:7px;line-height:1.45}.recap-link{position:relative;z-index:1;color:var(--accent);font-size:12px;font-weight:800;display:block;margin-top:13px}.recap-winner{position:relative;z-index:1;display:flex;align-items:center;gap:10px}.recap-winner .avatar,.recap-winner img{width:38px!important;height:38px!important;font-size:13px!important;box-shadow:0 0 0 2px rgba(var(--accent-rgb),.25)}.recap-winner-points{color:var(--accent);font-size:11px;font-weight:800;margin-top:3px}.recap-podium{position:relative;z-index:1;display:grid;gap:7px}.recap-podium-row{display:flex;align-items:center;gap:7px;color:var(--text);font-size:12px;font-weight:700}.recap-podium-row .avatar,.recap-podium-row img{width:23px!important;height:23px!important;font-size:8px!important}.recap-place{width:20px;color:var(--muted);font-size:10px}.recap-move{position:relative;z-index:1;display:flex;align-items:baseline;gap:7px}.recap-move strong{font-size:25px;color:#59fba0;letter-spacing:-1px}.recap-move span{font-size:12px;color:var(--muted)}.recap-debuts{position:relative;z-index:1;display:flex;align-items:center;gap:7px;flex-wrap:wrap}.recap-debuts .avatar,.recap-debuts img{width:27px!important;height:27px!important;font-size:9px!important}
     .versus-hero { position:relative; overflow:hidden; padding:27px; border-radius:20px; border:1px solid rgba(89,214,251,.3); background:linear-gradient(110deg,rgba(89,214,251,.1),rgba(160,89,251,.08),var(--card)); margin-bottom:18px; }.versus-hero h1{font-size:28px;margin:0;letter-spacing:-.8px}.versus-hero p{font-size:13px;color:var(--muted);margin:8px 0 0}.versus-controls{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:18px}.versus-selectors{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.versus-selectors select{min-width:170px}.versus-vs{color:var(--accent);font-weight:900;font-size:13px;padding:8px}.matchup-board{overflow:hidden;padding:0!important}.fighter-stage{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;padding:25px 22px;position:relative;background:linear-gradient(100deg,rgba(89,214,251,.07),transparent 45%,rgba(160,89,251,.07))}.fighter{position:relative;z-index:1;display:flex;align-items:center;gap:12px}.fighter.right{justify-content:flex-end;text-align:right}.fighter .h2h-avatar-big{width:56px;height:56px;font-size:18px}.fighter-name{font-size:18px;font-weight:900}.fighter-sub{color:var(--muted);font-size:12px;margin-top:3px}.match-score{text-align:center;position:relative;z-index:1}.match-score .score{font-size:36px;font-weight:900;line-height:1;color:var(--accent);font-variant-numeric:tabular-nums}.match-score .caption{color:var(--muted);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;margin-top:7px}.match-meta{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}.match-meta div{text-align:center;padding:13px;color:var(--muted);font-size:11px;border-right:1px solid var(--border)}.match-meta div:last-child{border:0}.match-meta b{display:block;color:var(--text);font-size:18px;margin-top:4px}.matchup-board .h2h-stats{padding:8px 18px}.matchup-board .h2h-matchups{margin:0;padding:18px;border-top:1px solid var(--border)}
     @media (max-width:900px) { .recap-grid{grid-template-columns:repeat(2,1fr);}.race-podium{grid-template-columns:1fr;} }
     @media (max-width:700px) { .recap-grid{grid-template-columns:1fr;}.fighter-stage{grid-template-columns:1fr auto 1fr;gap:8px;padding:19px 12px}.fighter{flex-direction:column;gap:6px}.fighter.right{flex-direction:column-reverse}.fighter-name{font-size:13px}.fighter .h2h-avatar-big{width:44px;height:44px;font-size:14px}.match-score .score{font-size:25px}.versus-selectors select{min-width:125px;max-width:145px} }
@@ -188,7 +219,7 @@
 
     .search-wrap input:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(233, 251, 89, .15);
+      box-shadow: 0 0 0 3px rgba(var(--accent-rgb), .15);
     }
 
     .search-results {
@@ -251,7 +282,7 @@
 
     .card:hover {
       transform: translateY(-3px);
-      border-color: rgba(233, 251, 89, .3);
+      border-color: rgba(var(--accent-rgb), .3);
       box-shadow: 0 8px 30px rgba(0, 0, 0, .4);
     }
 
@@ -366,7 +397,7 @@
     }
 
     tbody tr:hover {
-      background: rgba(233, 251, 89, .05);
+      background: rgba(var(--accent-rgb), .05);
     }
 
     .player-cell {
@@ -493,7 +524,7 @@
       flex-wrap: wrap;
       justify-content: center;
       padding: 24px;
-      background: radial-gradient(circle at 50% 0%, rgba(233, 251, 89, .08), transparent 70%);
+      background: radial-gradient(circle at 50% 0%, rgba(var(--accent-rgb), .08), transparent 70%);
       border-radius: var(--radius);
       border: 1px solid var(--border);
     }
@@ -802,8 +833,8 @@
     .profile-hero {
       position: relative;
       overflow: hidden;
-      background: linear-gradient(120deg, rgba(233, 251, 89, .12), rgba(89, 214, 251, .06) 52%, var(--card));
-      border: 1px solid rgba(233, 251, 89, .25);
+      background: linear-gradient(120deg, rgba(var(--accent-rgb), .12), rgba(89, 214, 251, .06) 52%, var(--card));
+      border: 1px solid rgba(var(--accent-rgb), .25);
       border-radius: var(--radius);
       padding: 22px;
       margin-bottom: 18px;
@@ -817,7 +848,7 @@
       border-radius: 50%;
       right: -100px;
       top: -130px;
-      background: radial-gradient(circle, rgba(233, 251, 89, .15), transparent 68%);
+      background: radial-gradient(circle, rgba(var(--accent-rgb), .15), transparent 68%);
       pointer-events: none;
     }
 
@@ -1166,8 +1197,8 @@
     }
 
     .season-intro {
-      background: linear-gradient(120deg, rgba(233, 251, 89, .09), rgba(89, 214, 251, .06) 54%, transparent);
-      border: 1px solid rgba(233, 251, 89, .2);
+      background: linear-gradient(120deg, rgba(var(--accent-rgb), .09), rgba(89, 214, 251, .06) 54%, transparent);
+      border: 1px solid rgba(var(--accent-rgb), .2);
       border-radius: var(--radius);
       padding: 20px;
       margin-bottom: 18px;
@@ -1234,8 +1265,8 @@
     }
 
     .compare-spotlight-card {
-      background: linear-gradient(135deg, rgba(233, 251, 89, .13), rgba(23, 23, 28, .9));
-      border: 1px solid rgba(233, 251, 89, .23);
+      background: linear-gradient(135deg, rgba(var(--accent-rgb), .13), rgba(23, 23, 28, .9));
+      border: 1px solid rgba(var(--accent-rgb), .23);
       border-radius: 14px;
       padding: 16px;
     }
@@ -1400,16 +1431,17 @@
       </svg>
     </a>
     <div class="logo">⚡ SpeedTAS</div>
+    <div class="game-switch" id="gameSwitch"><a href="#/" data-game="tmnf" class="active">TMNF</a><a href="#/tm20" data-game="tm20">TM2020</a></div>
     <nav id="nav">
       <a href="#/" data-route="/">Home</a>
       <a href="#/players" data-route="/players">Players</a>
       <a href="#/history" data-route="/history">History</a>
       <a href="#/records" data-route="/records">Records</a>
       <a href="#/rivalries" data-route="/rivalries">Rivalries</a>
-      <a href="#/season-compare" data-route="/season-compare">S1 ↔ S2</a>
-      <a href="#/all-time" data-route="/all-time">All-time</a>
+      <a href="#/season-compare" data-route="/season-compare" data-tmnf-only>S1 ↔ S2</a>
+      <a href="#/all-time" data-route="/all-time" data-tmnf-only>All-time</a>
       <a href="#/versus" data-route="/versus">Head-to-Head</a>
-      <a href="#/videos" data-route="/videos">Videos</a>
+      <a href="#/videos" data-route="/videos" data-tmnf-only>Videos</a>
     </nav>
     <div class="search-wrap">
       <input id="globalSearch" placeholder="Search players or editions...">
@@ -1434,7 +1466,21 @@
        all proxied through it; its Discord and YouTube keys stay in Worker
        secrets, never here. */
     const SPEEDTAS_API_URL = "https://speedtas-api.kristianogeorgiev652.workers.dev";
-    const POINTS = {1: 10, 2: 7, 3: 6, 4: 5, 5: 4, 6: 3, 7: 2, 8: 1};
+    const TMNF_POINTS = {1: 10, 2: 7, 3: 6, 4: 5, 5: 4, 6: 3, 7: 2, 8: 1};
+    const TM20_POINTS = {1: 12, 2: 9, 3: 8, 4: 7, 5: 6, 6: 5, 7: 4, 8: 3, 9: 2, 10: 1}; // top 10 score
+    let POINTS = TMNF_POINTS; // swapped by setGame()
+
+    /* ============ TM2020 SECTION ============
+       TM2020 results live in their own published spreadsheet (same layout as the
+       TMNF "Editions" tab). Discord IDs / avatars still come from the existing
+       Players tab, so profile pictures are shared between both games.
+       TM20_EDITIONS_GID: open the TM2020 sheet on its Editions tab and copy the number after
+       "gid=" in the address bar. Leave '' only if Editions is the FIRST tab of the sheet. */
+    const TM20_CSV_BASE = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRDvd1q6-1ze91Uv30Lm4nOjkx9Q-r2ceqkSetJIeILpYzBfRKlwU-wT6GhJ2Xh_b3XLLIYMrsBb1m_/pub";
+    const TM20_EDITIONS_GID = "";
+    let GAME = 'tmnf', ROUTE_GAME = 'tmnf';
+    const DATA = {tmnf: null, tm20: null};
+    const S2L = () => GAME === 'tm20' ? 'TM2020' : 'Season ' + '2'; // label of the "current" data set
 
     /* Last-resort snapshot of the real sheet — used only if BOTH the Worker's
        cached /data endpoint and a direct browser connection to Google Sheets
@@ -1519,6 +1565,185 @@
       return season1Promise;
     }
 
+    /* ============ TM2020 DATA ============ */
+    let tm20Promise = null;
+    function tm20CsvUrl() {
+      return TM20_CSV_BASE + '?' + (TM20_EDITIONS_GID ? 'gid=' + encodeURIComponent(TM20_EDITIONS_GID) + '&single=true&' : '') + 'output=csv';
+    }
+    function parseTM20Text(text) {
+      // The Editions tab's A1 cell always starts with 👥 — if it doesn't, the link points at another tab.
+      if (!/^["']?👥/.test(text.trim())) throw new Error('The TM2020 link is not pointing at the Editions tab. Set TM20_EDITIONS_GID (or move Editions to be the first tab).');
+      return parseDelimitedText(text);
+    }
+    function loadTM20() {
+      if (DATA.tm20) return Promise.resolve(DATA.tm20);
+      if (!tm20Promise) {
+        const proxyUrl = (SPEEDTAS_API_URL || '').replace(/\/+$/, '');
+        const viaWorker = proxyUrl
+          ? fetch(proxyUrl + '/data?season=tm20').then(async r => {
+              if (!r.ok) {
+                let msg = `Worker responded with ${r.status}`;
+                try {const b = await r.json(); if (b && b.error) msg = b.error;} catch (e) {}
+                throw new Error(msg);
+              }
+              const payload = await r.json();
+              return {editions: payload.editions, players: payload.players};
+            })
+          : Promise.reject(new Error('No SPEEDTAS_API_URL configured.'));
+        tm20Promise = viaWorker
+          .catch(err => {
+            console.warn('TM2020 via Worker failed; trying the published sheet directly.', err);
+            return fetch(tm20CsvUrl()).then(r => {if (!r.ok) throw new Error('The TM2020 sheet could not be reached.'); return r.text();}).then(parseTM20Text);
+          })
+          .then(d => DATA.tm20 = canonicalizeDataset(d))
+          .finally(() => {tm20Promise = null;});
+      }
+      return tm20Promise;
+    }
+
+    /* ============ TAS EXCHANGE EVENTS ============ */
+    /* The Worker's /events-index finds which tmtas.exchange event is "edition N" by reading event titles.
+       EVENT_PATTERN is a regular expression matched against the event title (the title must contain "#N").
+       If an edition can't be found automatically, pin it by hand: EVENT_ID_OVERRIDES.tm20 = {"5": 260}. */
+    const EVENT_PATTERN = {tmnf: 'SpeedTAS Season2', tm20: 'SpeedTAS TM20'}; // titles look like "SpeedTAS TM20 #4"
+    const EVENT_ID_RANGE = {tmnf: [40, 300], tm20: [200, 600]};
+    const EVENT_ID_OVERRIDES = {tmnf: {}, tm20: {"1": 229, "2": 240, "3": 251, "4": 258}}; // known events always win; later ones are found automatically
+    /* Hosts sometimes upload a competitor's run under their own name. Their entry is then handed to the competitor
+       who has no time of their own - unless the sheet shows the host competed (then it's the host's own run). */
+    const EVENT_HOSTS = {tmnf: ['Kristiano'], tm20: ['Kristiano']};
+    const EVENT_INDEX = {tmnf: null, tm20: null};
+    const eventPromises = {};
+    const eventUrl = id => 'https://tmtas.exchange/events/' + id;
+    function eventFor(game, edition) {
+      const pinned = EVENT_ID_OVERRIDES[game] && EVENT_ID_OVERRIDES[game][String(edition)];
+      if (pinned) return {id: pinned};
+      return (EVENT_INDEX[game] || {})[String(edition).trim()] || null;
+    }
+    function loadEventIndex(game, onUpdate) {
+      const proxyUrl = (SPEEDTAS_API_URL || '').replace(/\/+$/, '');
+      if (!proxyUrl) return Promise.resolve({}).then(r => {if (onUpdate) onUpdate(); return r;});
+      const cacheKey = 'speedtas_events_' + game;
+      if (!eventPromises[game]) {
+        let cached = null;
+        try {cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');} catch (e) {}
+        if (cached && cached.events && Date.now() - cached.t < 3600e3) {
+          EVENT_INDEX[game] = cached.events;
+          eventPromises[game] = Promise.resolve(cached.events);
+        } else {
+          eventPromises[game] = (async () => {
+            const [from, to] = EVENT_ID_RANGE[game];
+            for (let i = 0; i < 12; i++) {
+              const r = await fetch(`${proxyUrl}/events-index?pattern=${encodeURIComponent(EVENT_PATTERN[game])}&from=${from}&to=${to}`);
+              if (!r.ok) throw new Error('events-index ' + r.status);
+              const b = await r.json();
+              EVENT_INDEX[game] = b.events || {};
+              if (onUpdate) onUpdate();
+              if (b.complete) {try {localStorage.setItem(cacheKey, JSON.stringify({t: Date.now(), events: EVENT_INDEX[game]}));} catch (e) {} break;}
+            }
+            return EVENT_INDEX[game] || {};
+          })().catch(err => {console.warn('TAS Exchange event lookup failed', err); delete eventPromises[game]; return EVENT_INDEX[game] || {};});
+        }
+      }
+      return eventPromises[game].then(r => {if (onUpdate) onUpdate(); return r;});
+    }
+    function fillHistoryEventLinks() {
+      document.querySelectorAll('.history-event[data-edition]').forEach(el => {
+        const ev = eventFor(GAME, el.dataset.edition);
+        if (ev && !el.firstChild) el.innerHTML = `<span class="ext-link" data-ext="${eventUrl(ev.id)}" title="Open this event on TAS Exchange">TAS Exchange ↗</span>`;
+      });
+    }
+    document.addEventListener('click', e => {
+      const x = e.target.closest && e.target.closest('[data-ext]');
+      if (!x) return;
+      e.preventDefault(); e.stopPropagation();
+      window.open(x.dataset.ext, '_blank', 'noopener');
+    }, true);
+    function parseTimeSeconds(t) {
+      const m = String(t || '').trim().match(/^(?:(\d+):)?(\d+(?:\.\d+)?)$/);
+      return m ? (m[1] ? parseInt(m[1], 10) * 60 : 0) + parseFloat(m[2]) : null;
+    }
+    function matchEntrantsToPlayers(entrants, names, opts = {}) {
+      const byKey = {};
+      names.forEach(n => byKey[playerKey(n)] = n);
+      const out = {}, leftovers = [];
+      entrants.forEach(en => {
+        const k = playerKey(en.entrant);
+        let name = byKey[k];
+        if (!name) {const close = Object.keys(byKey).filter(x => oneLetterApart(x, k)); if (close.length === 1) name = byKey[close[0]];}
+        if (name) {if (!out[name]) out[name] = en;} else leftovers.push(en);
+      });
+      /* A host uploading a run for someone else shows up as the HOST's entry. If the sheet says the host did not
+         compete, that entry belongs to a competitor with no time yet: the one whose sheet placement equals the
+         entry's position, or the only competitor still without a time. */
+      const hostKeys = (opts.hosts || []).map(playerKey);
+      if (hostKeys.length && !hostKeys.some(h => byKey[h])) {
+        leftovers.filter(en => hostKeys.includes(playerKey(en.entrant))).forEach(en => {
+          const free = names.filter(n => !out[n]);
+          let pick = opts.placements ? free.filter(n => opts.placements[n] === en.pos) : [];
+          if (pick.length !== 1 && free.length === 1) pick = free;
+          if (pick.length === 1) out[pick[0]] = {...en, viaHost: stripNote(en.entrant)};
+        });
+      }
+      return out;
+    }
+    function attachEditionEvent(ed, seasonKey) {
+      if (seasonKey === 's1') return;
+      const edition = ed.edition, game = GAME;
+      const stillHere = () => document.getElementById('eventLink') && document.getElementById('eventLink').dataset.edition === String(edition);
+      loadEventIndex(game).then(() => {
+        const ev = eventFor(game, edition);
+        if (!ev || !stillHere()) return;
+        const link = document.getElementById('eventLink');
+        link.href = eventUrl(ev.id); link.style.display = '';
+        const proxyUrl = (SPEEDTAS_API_URL || '').replace(/\/+$/, '');
+        return fetch(`${proxyUrl}/event-results?id=${ev.id}`).then(r => r.ok ? r.json() : null).then(data => {
+          if (!data || !data.results || !stillHere()) return;
+          const matched = matchEntrantsToPlayers(data.results, Object.keys(ed.results), {placements: ed.results, hosts: EVENT_HOSTS[game]});
+          const secs = Object.values(matched).map(en => parseTimeSeconds(en.time)).filter(x => x != null);
+          const best = secs.length ? Math.min(...secs) : null;
+          let filled = 0;
+          document.querySelectorAll('.time-cell[data-player]').forEach(cell => {
+            const en = matched[cell.dataset.player];
+            if (!en || !en.time) return;
+            const t = parseTimeSeconds(en.time), gap = (t != null && best != null && t - best > 0.0001) ? `<small>+${(t - best).toFixed(2)}</small>` : '';
+            const via = en.viaHost ? `<small title="Uploaded by ${escapeHtml(en.viaHost)} on this player's behalf" style="cursor:help">ⓘ</small>` : '';
+            cell.innerHTML = escapeHtml(en.time) + gap + via; filled++;
+          });
+          if (filled) document.querySelector('.results-table').classList.remove('no-times');
+        });
+      }).catch(err => console.warn('Event times unavailable', err));
+    }
+
+    /* ============ GAME CONTEXT ============ */
+    function applyTheme(g) {
+      document.body.classList.toggle('game-tm20', g === 'tm20');
+      window.PARTICLE_COLOR = g === 'tm20' ? '#59d6fb' : '#e9fb59';
+      document.title = g === 'tm20' ? 'SpeedTAS Stats · TM2020' : 'SpeedTAS Stats';
+      document.querySelectorAll('#gameSwitch a').forEach(a => a.classList.toggle('active', a.dataset.game === g));
+      document.querySelectorAll('#nav a[data-route]').forEach(a => {
+        const r = a.dataset.route;
+        a.setAttribute('href', g === 'tm20' ? '#/tm20' + (r === '/' ? '' : r) : '#' + r);
+      });
+    }
+    function setGame(g) {
+      if (g !== GAME) {
+        if (GAME === 'tmnf') DATA.tmnf = RAW; // RAW always holds the active game's data
+        GAME = g;
+        RAW = g === 'tm20' ? DATA.tm20 : DATA.tmnf;
+      }
+      POINTS = g === 'tm20' ? TM20_POINTS : TMNF_POINTS;
+      applyTheme(g);
+    }
+    /* In TM2020 mode every in-app link gets the #/tm20 prefix (also for content that renders later). */
+    function prefixLinks(root) {
+      if (GAME !== 'tm20') return;
+      root.querySelectorAll('a[href^="#/"]').forEach(a => {
+        const h = a.getAttribute('href');
+        if (h === '#/tm20' || h.startsWith('#/tm20/')) return;
+        a.setAttribute('href', '#/tm20' + (h === '#/' ? '' : h.slice(1)));
+      });
+    }
+
     /* ============ PARTICLES ============ */
     (function particles() {
       const c = document.getElementById('particles');
@@ -1530,7 +1755,7 @@
       for (let i = 0; i < N; i++) pts.push({x: Math.random() * w, y: Math.random() * h, vx: (Math.random() - .5) * .15, vy: (Math.random() - .5) * .15, r: Math.random() * 1.6 + .4});
       function loop() {
         ctx.clearRect(0, 0, w, h);
-        ctx.fillStyle = '#e9fb59';
+        ctx.fillStyle = window.PARTICLE_COLOR || '#e9fb59';
         pts.forEach(p => {
           p.x += p.vx; p.y += p.vy;
           if (p.x < 0) p.x = w; if (p.x > w) p.x = 0; if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
@@ -1716,10 +1941,25 @@
        sent in a single request forever. Splitting into batches keeps each
        request to the Worker safely under that limit, however large the
        roster grows — it just becomes a few more sequential requests. */
+    const AVATAR_STORE_KEY = 'speedtas_discord_avatars_v1';
+    let AVATAR_RETRY_IDS = [];
+    function readAvatarStore() {
+      try {const v = JSON.parse(localStorage.getItem(AVATAR_STORE_KEY) || 'null'); if (v && v.avatars) return v;} catch (e) {}
+      return {ids: {}, avatars: {}};
+    }
+    function saveAvatarStore() {
+      try {localStorage.setItem(AVATAR_STORE_KEY, JSON.stringify({t: Date.now(), ids: DISCORD_IDS, avatars: DISCORD_AVATARS}));} catch (e) {}
+    }
+    /* Pictures from the last visit appear instantly and stay if Discord/the Worker is having a bad moment. */
+    function prefillAvatarsFromStore() {
+      const v = readAvatarStore();
+      DISCORD_IDS = {...v.ids}; DISCORD_AVATARS = {...v.avatars};
+    }
     async function fetchAvatarsInBatches(proxyUrl, ids, batchSize = 20) {
-      const avatars = {};
-      for (let i = 0; i < ids.length; i += batchSize) {
-        const batch = ids.slice(i, i + batchSize);
+      const avatars = {}, transient = new Set(), queue = [...ids];
+      let calls = 0;
+      while (queue.length && calls < 60) {
+        const batch = queue.splice(0, batchSize); calls++;
         try {
           const data = await retryAsync(async () => {
             const res = await fetch(proxyUrl + '/avatars?ids=' + encodeURIComponent(batch.join(',')));
@@ -1727,15 +1967,31 @@
             return res.json();
           });
           Object.assign(avatars, data.avatars || {});
-        } catch (err) {console.warn('Avatar batch failed after retries, continuing with the rest:', err);}
+          (data.pending || []).forEach(id => queue.push(id));            // Worker ran out of its per-request budget: ask again
+          Object.keys(data.failed || {}).forEach(id => transient.add(id)); // Discord had a temporary problem: retry later
+        } catch (err) {
+          batch.forEach(id => transient.add(id));
+          console.warn('Avatar batch failed after retries, will try again later:', err);
+        }
       }
+      AVATAR_RETRY_IDS = [...transient].filter(id => !avatars[id]);
       return avatars;
+    }
+    function scheduleAvatarRetry(proxyUrl) {
+      [4000, 12000, 30000].forEach(delay => setTimeout(async () => {
+        if (!AVATAR_RETRY_IDS.length) return;
+        const got = await fetchAvatarsInBatches(proxyUrl, [...AVATAR_RETRY_IDS]);
+        if (Object.keys(got).length) {
+          Object.assign(DISCORD_AVATARS, got); saveAvatarStore();
+          if (!/versus/.test(location.hash)) render(); // don't wipe a half-made head-to-head selection
+        }
+      }, delay));
     }
 
     async function loadDiscordProfiles() {
       try {
         const proxyUrl = (SPEEDTAS_API_URL || getAvatarProxyUrl() || '').replace(/\/+$/, '');
-        DISCORD_IDS = {};
+        DISCORD_IDS = {...DISCORD_IDS}; let freshRoster = 0; // keep last visit's IDs until the new roster arrives
         // The Worker fetches the Players tab so public browsers never have
         // to execute a Google JSONP script to build the avatar roster.
         let rosterLoaded = false;
@@ -1747,9 +2003,9 @@
               return res.json();
             });
             Object.entries(response.players || {}).forEach(([name, id]) => {
-              if (/^\d{15,25}$/.test(String(id))) DISCORD_IDS[playerKey(name)] = String(id);
+              if (/^\d{15,25}$/.test(String(id))) {DISCORD_IDS[playerKey(name)] = String(id); freshRoster++;}
             });
-            rosterLoaded = Object.keys(DISCORD_IDS).length > 0;
+            rosterLoaded = freshRoster > 0;
           } catch (err) {console.warn('Worker Players endpoint unavailable; falling back to Google Sheets.', err);}
         }
         if (!rosterLoaded) {
@@ -1764,7 +2020,10 @@
         }
         if (proxyUrl && Object.keys(DISCORD_IDS).length) {
           const ids = [...new Set(Object.values(DISCORD_IDS))];
-          DISCORD_AVATARS = await fetchAvatarsInBatches(proxyUrl, ids);
+          const fresh = await fetchAvatarsInBatches(proxyUrl, ids);
+          DISCORD_AVATARS = {...DISCORD_AVATARS, ...fresh}; // new answers win, older known-good pictures are kept
+          saveAvatarStore();
+          scheduleAvatarRetry(proxyUrl);
         }
       } catch (err) {console.warn('Discord player directory unavailable:', err);}
     }
@@ -1808,6 +2067,7 @@
         p.avgPlacement = p.placements.length ? (p.placements.reduce((a, b) => a + b, 0) / p.placements.length) : null;
         p.best = p.placements.length ? Math.min(...p.placements) : null;
         p.worst = p.placements.length ? Math.max(...p.placements) : null;
+        p.top10 = p.placements.filter(x => x <= 10).length;
         p.winRate = p.played ? p.wins / p.played : 0;
         p.podiumRate = p.played ? p.podiums / p.played : 0;
         p.avgPoints = p.played ? p.points / p.played : 0;
@@ -1817,18 +2077,21 @@
       // played editions), because a missed edition must break a streak even
       // though it's not the same as a bad placement. E.g. win, skip, win, win
       // is a streak of 2, not 3 — a gap in participation resets the counter.
-      Object.values(players).forEach(p => {p.maxWinStreak = 0; p.maxPodiumStreak = 0;});
+      Object.values(players).forEach(p => {p.maxWinStreak = 0; p.maxPodiumStreak = 0; p.maxTop10Streak = 0;});
       {
-        const curWin = {}, curPodium = {};
+        const curWin = {}, curPodium = {}, curTop10 = {};
         data.editions.forEach(ed => {
           Object.values(players).forEach(p => {
             const place = ed.results[p.name];
             if (place === undefined) {
               curWin[p.name] = 0;
               curPodium[p.name] = 0;
+              curTop10[p.name] = 0;
             } else {
               curWin[p.name] = (place === 1) ? (curWin[p.name] || 0) + 1 : 0;
               curPodium[p.name] = (place <= 3) ? (curPodium[p.name] || 0) + 1 : 0;
+              curTop10[p.name] = (place <= 10) ? (curTop10[p.name] || 0) + 1 : 0;
+              if (curTop10[p.name] > p.maxTop10Streak) p.maxTop10Streak = curTop10[p.name];
               if (curWin[p.name] > p.maxWinStreak) p.maxWinStreak = curWin[p.name];
               if (curPodium[p.name] > p.maxPodiumStreak) p.maxPodiumStreak = curPodium[p.name];
             }
@@ -1873,6 +2136,7 @@
         if (p.rank && p.rank <= 3) badges.push({icon: '⭐', label: 'Top 3 Leaderboard'});
         if (p.played >= 10) badges.push({icon: '🎯', label: '10 Editions Played'});
         if (p.points >= 100) badges.push({icon: '💯', label: '100 Points'});
+        if (GAME === 'tm20' && p.top10 >= 10) badges.push({icon: '🔟', label: '10 Top-10 Finishes'});
         p.badges = badges;
       });
 
@@ -2137,6 +2401,8 @@
       const parts = hash.split('/').filter(Boolean).map(part => {
         try { return decodeURIComponent(part); } catch (e) { return part; }
       });
+      ROUTE_GAME = 'tmnf';
+      if (parts[0] === 'tm20') {ROUTE_GAME = 'tm20'; parts.shift();}
       return parts;
     }
     window.addEventListener('hashchange', render);
@@ -2172,7 +2438,7 @@
 
       main.innerHTML = `
     <section>
-      <div class="compact-page-heading"><h1>Season 2 leaderboard</h1><p>Live standings, race recaps, and the matchups everyone is watching.</p></div>
+      <div class="compact-page-heading"><h1>${S2L()} leaderboard</h1><p>Live standings, race recaps, and the matchups everyone is watching.</p></div>
       <div class="grid cards">
         <div class="card" style="animation-delay:.02s"><div class="label">Editions</div><div class="value">${totalEditions}</div></div>
         <div class="card" style="animation-delay:.05s"><div class="label">Players</div><div class="value">${totalPlayers}</div></div>
@@ -2193,10 +2459,10 @@
       </div>
     </section>
 
-    <section>
+    ${GAME === 'tm20' ? '' : `<section>
       <div class="countdown-title">Next SpeedTAS starts in</div>
       <div class="countdown" id="countdown"></div>
-    </section>
+    </section>`}
 
     <section>
       <h2 class="section-title">Top 6 Players — Progress</h2>
@@ -2393,9 +2659,9 @@
       else if (seasonKey === 'both') {
         const rows = comparisonRows(seasonStats(season1Data), seasonStats(RAW));
         ranked = rows.map(r => ({name: r.name, points: r.total, played: r.played, wins: r.wins, podiums: r.podiums})).sort((a, b) => b.points - a.points || b.wins - a.wins).map((p, i) => ({...p, rank: i + 1})); label = 'Both seasons';
-      } else {ranked = seasonStats(RAW); label = 'Season 2';}
+      } else {ranked = seasonStats(RAW); label = S2L();}
       const linkSeason = seasonKey === 'both' ? 'all' : seasonKey;
-      main.innerHTML = `<section><h2 class="section-title">Player Directory</h2><div class="filters"><button class="filter-btn ${seasonKey === 's2' ? 'active' : ''}" data-directory-season="s2">Season 2</button><button class="filter-btn ${seasonKey === 's1' ? 'active' : ''}" data-directory-season="s1">Season 1</button><button class="filter-btn ${seasonKey === 'both' ? 'active' : ''}" data-directory-season="both">Both</button></div><p style="color:var(--muted);font-size:13px;margin:-6px 0 16px;">${label} · ${ranked.length} player${ranked.length === 1 ? '' : 's'}</p><input id="dirSearch" placeholder="Filter players..." style="width:100%;max-width:320px;margin-bottom:18px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);outline:none;"><div class="directory" id="directoryGrid">${ranked.map((p, i) => `<a href="#/player/${linkSeason}/${encodeURIComponent(p.name)}" class="player-card-link" data-name="${p.name.toLowerCase()}"><div class="player-card" style="animation-delay:${Math.min(i, 25) * 0.02}s"><div style="margin:0 auto 10px;">${avatarHTML(p.name, 48)}</div><div class="pname">${p.name}</div><div class="pmeta">Rank #${p.rank} · ${p.points} pts</div></div></a>`).join('')}</div></section>`;
+      main.innerHTML = `<section><h2 class="section-title">Player Directory</h2><div class="filters"><button class="filter-btn ${seasonKey === 's2' ? 'active' : ''}" data-directory-season="s2">${S2L()}</button><button class="filter-btn ${seasonKey === 's1' ? 'active' : ''}" data-directory-season="s1">Season 1</button><button class="filter-btn ${seasonKey === 'both' ? 'active' : ''}" data-directory-season="both">Both</button></div><p style="color:var(--muted);font-size:13px;margin:-6px 0 16px;">${label} · ${ranked.length} player${ranked.length === 1 ? '' : 's'}</p><input id="dirSearch" placeholder="Filter players..." style="width:100%;max-width:320px;margin-bottom:18px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);outline:none;"><div class="directory" id="directoryGrid">${ranked.map((p, i) => `<a href="#/player/${linkSeason}/${encodeURIComponent(p.name)}" class="player-card-link" data-name="${p.name.toLowerCase()}"><div class="player-card" style="animation-delay:${Math.min(i, 25) * 0.02}s"><div style="margin:0 auto 10px;">${avatarHTML(p.name, 48)}</div><div class="pname">${p.name}</div><div class="pmeta">Rank #${p.rank} · ${p.points} pts</div></div></a>`).join('')}</div></section>`;
       main.querySelectorAll('[data-directory-season]').forEach(btn => btn.addEventListener('click', () => renderPlayers(btn.dataset.directorySeason, season1Data)));
       document.getElementById('dirSearch').addEventListener('input', e => {const q = e.target.value.toLowerCase(); document.querySelectorAll('#directoryGrid .player-card-link').forEach(link => link.style.display = link.dataset.name.includes(q) ? '' : 'none');});
     }
@@ -2509,8 +2775,8 @@
     }
 
     /* ============ RENDER: HISTORY ============ */
-    function seasonTabs(active, id) {return `<div class="filters" style="margin:0 0 18px;"><button class="filter-btn ${active === 's2' ? 'active' : ''}" data-${id}-season="s2">Season 2</button><button class="filter-btn ${active === 's1' ? 'active' : ''}" data-${id}-season="s1">Season 1</button></div>`;}
-    function profileTabs(active) {return `<div class="profile-season-tabs"><button class="filter-btn ${active === 's2' ? 'active' : ''}" data-profile-season="s2">Season 2</button><button class="filter-btn ${active === 's1' ? 'active' : ''}" data-profile-season="s1">Season 1</button><button class="filter-btn ${active === 'all' ? 'active' : ''}" data-profile-season="all">All-time</button></div>`;}
+    function seasonTabs(active, id) {return `<div class="filters" style="margin:0 0 18px;"><button class="filter-btn ${active === 's2' ? 'active' : ''}" data-${id}-season="s2">${S2L()}</button><button class="filter-btn ${active === 's1' ? 'active' : ''}" data-${id}-season="s1">Season 1</button></div>`;}
+    function profileTabs(active) {return `<div class="profile-season-tabs"><button class="filter-btn ${active === 's2' ? 'active' : ''}" data-profile-season="s2">${S2L()}</button><button class="filter-btn ${active === 's1' ? 'active' : ''}" data-profile-season="s1">Season 1</button><button class="filter-btn ${active === 'all' ? 'active' : ''}" data-profile-season="all">All-time</button></div>`;}
     function profilePlayerFor(data, requested) {
       const computed = computeAll(data), exact = computed.players[requested];
       if (exact) return {player: exact, computed};
@@ -2539,7 +2805,7 @@
         const selected = seasonKey === 's1' ? s1 : s2;
         p = selected?.player;
         if (!p || !p.played) {main.innerHTML = `<div class="empty-state">${decoded} has no results in Season ${seasonKey === 's1' ? '1' : '2'}.</div>`; return;}
-        history = p.history; profileName = p.name; rankLabel = 'Season rank'; seasonLabel = seasonKey === 's1' ? 'Season 1' : 'Season 2';
+        history = p.history; profileName = p.name; rankLabel = 'Season rank'; seasonLabel = seasonKey === 's1' ? 'Season 1' : S2L();
       }
       const color = colorForName(profileName), podiumCopy = p.podiums ? `${p.podiums} podium${p.podiums === 1 ? '' : 's'} · ${(p.podiumRate * 100).toFixed(0)}% podium rate` : 'No podium finish recorded yet';
       main.innerHTML = `
@@ -2556,11 +2822,11 @@
       profileCharts.push(new Chart(document.getElementById('chartCumulative'), {type: 'line', data: {labels, datasets: [{data: cumulative, borderColor: color, backgroundColor: color + '33', fill: true, tension: .3, pointRadius: 3}]}, options}));
     }
     function renderHistory(seasonKey = 's2') {
-      main.innerHTML = `<div class="loader"><div class="spinner"></div> Loading Season ${seasonKey === 's1' ? '1' : '2'} editions…</div>`;
+      main.innerHTML = `<div class="loader"><div class="spinner"></div> Loading ${seasonKey === 's1' ? 'Season 1' : S2L()} editions…</div>`;
       const dataPromise = seasonKey === 's1' ? loadSeason1() : Promise.resolve(RAW);
       dataPromise.then(data => {
         const editionsDesc = [...data.editions].reverse();
-        const seasonLabel = seasonKey === 's1' ? 'Season 1' : 'Season 2';
+        const seasonLabel = seasonKey === 's1' ? 'Season 1' : S2L();
         main.innerHTML = `
     <section>
       <div class="history-header"><div class="compact-page-heading" style="margin:0"><h1>Competition history</h1><p>Browse every SpeedTAS edition and its full results.</p></div><span class="history-count">${seasonLabel} · ${data.editions.length} editions</span></div>
@@ -2577,7 +2843,7 @@
               <div class="history-edition">Edition ${ed.edition}</div>
               <div class="history-winner">${winner ? avatarHTML(winner[0], 30) : ''}<div><div class="history-winner-label">🏆 Winner</div><div class="history-winner-name">${winner ? winner[0] : 'Result pending'}</div></div></div>
               <div class="history-stats"><span>Racers<b>${entries.length}</b></span><span>Podium spots<b>${podiumCount}</b></span></div>
-              <span class="history-open">View results →</span>
+              ${seasonKey !== 's1' ? `<div class="history-event" data-edition="${escapeHtml(ed.edition)}"></div>` : ''}<span class="history-open">View results →</span>
             </div>
           </a>`;
         }).join('')}
@@ -2585,6 +2851,7 @@
     </section>
   `;
         main.querySelectorAll('[data-history-season]').forEach(btn => btn.addEventListener('click', () => renderHistory(btn.dataset.historySeason)));
+        if (seasonKey !== 's1') loadEventIndex(GAME, fillHistoryEventLinks);
       }).catch(err => {main.innerHTML = `<div class="panel"><h2 class="section-title">Season 1 unavailable</h2><p style="color:var(--muted)">${err.message}</p></div>`;});
     }
 
@@ -2596,24 +2863,26 @@
       const entries = Object.entries(ed.results).sort((a, b) => a[1] - b[1]);
       const podium = entries.filter(([, place]) => place <= 3).slice(0, 3);
       main.innerHTML = `
-    <div class="breadcrumb"><a href="#/history">History</a> / ${seasonKey === 's1' ? 'Season 1' : 'Season 2'} / Edition ${ed.edition}</div>
-    <div class="race-header"><div class="race-heading"><div class="race-edition-mark">#${ed.edition}</div><div><h1>${seasonKey === 's1' ? 'Season 1' : 'Season 2'} · Edition ${ed.edition}</h1><p>${entries.length} racers competed in this edition</p></div></div><a class="filter-btn" href="#/history">← All editions</a></div>
+    <div class="breadcrumb"><a href="#/history">History</a> / ${seasonKey === 's1' ? 'Season 1' : S2L()} / Edition ${ed.edition}</div>
+    <div class="race-header"><div class="race-heading"><div class="race-edition-mark">#${ed.edition}</div><div><h1>${seasonKey === 's1' ? 'Season 1' : S2L()} · Edition ${ed.edition}</h1><p>${entries.length} racers competed in this edition</p></div></div><div style="display:flex;gap:8px;flex-wrap:wrap">${seasonKey !== 's1' ? `<a class="filter-btn" id="eventLink" data-edition="${escapeHtml(ed.edition)}" target="_blank" rel="noopener" style="display:none">TAS Exchange ↗</a>` : ''}<a class="filter-btn" href="#/history">← All editions</a></div></div>
     <div class="race-podium">${[1, 2, 3].map(place => {const finisher = podium.find(([, p]) => p === place); const label = ['🥇 First place', '🥈 Second place', '🥉 Third place'][place - 1]; const cls = ['gold', 'silver', 'bronze'][place - 1]; return `<div class="race-podium-place ${cls}"><div class="race-place-label">${label}</div><div class="race-podium-player">${finisher ? avatarHTML(finisher[0], 34) : ''}<span>${finisher ? finisher[0] : '—'}</span></div><div class="race-podium-points">${finisher ? pointsFor(place) + ' points' : 'No result'}</div></div>`;}).join('')}</div>
     <div class="panel results-panel"><div class="results-panel-head"><b>Full results</b><span>Placement points awarded</span></div>
-      <table class="results-table">
-        <thead><tr><th>Placement</th><th>Player</th><th>Points</th></tr></thead>
+      <table class="results-table no-times">
+        <thead><tr><th>Placement</th><th>Player</th><th>Points</th><th class="time-th">Time</th></tr></thead>
         <tbody>
           ${entries.map(([name, place], i) => `
             <tr class="row-anim" style="animation-delay:${i * 0.02}s">
               <td>${place <= 3 ? medalFor(place) : ''}${place}</td>
               <td><a href="#/player/${seasonKey}/${encodeURIComponent(name)}"><div class="player-cell">${avatarHTML(name)}<b>${name}</b></div></a></td>
               <td style="color:var(--accent);font-weight:700;">${pointsFor(place)}</td>
+              <td class="time-cell" data-player="${escapeHtml(name)}"></td>
             </tr>
           `).join('')}
         </tbody>
       </table>
     </div>
   `;
+      attachEditionEvent(ed, seasonKey);
     }
 
     /* ============ RENDER: VERSUS ============ */
@@ -2650,7 +2919,7 @@
       main.innerHTML = `
     <section>
       <div class="compact-page-heading"><h1>Head-to-head</h1><p>Choose two racers and compare their shared editions, form, and results.</p></div>
-      <div class="versus-controls"><div class="season-picker"><button data-h2h-season="s2" class="${seasonKey === 's2' ? 'active' : ''}">Season 2</button><button data-h2h-season="s1" class="${seasonKey === 's1' ? 'active' : ''}">Season 1</button><button data-h2h-season="both" class="${seasonKey === 'both' ? 'active' : ''}">Both</button></div><div class="versus-selectors"><select id="selA">${names.map(n => `<option value="${n}" ${n === a ? 'selected' : ''}>${n}</option>`).join('')}</select><span class="versus-vs">VS</span><select id="selB">${names.map(n => `<option value="${n}" ${n === b ? 'selected' : ''}>${n}</option>`).join('')}</select><button class="h2h-swap" id="swapH2H" type="button">⇄</button></div></div>
+      <div class="versus-controls"><div class="season-picker"><button data-h2h-season="s2" class="${seasonKey === 's2' ? 'active' : ''}">${S2L()}</button><button data-h2h-season="s1" class="${seasonKey === 's1' ? 'active' : ''}">Season 1</button><button data-h2h-season="both" class="${seasonKey === 'both' ? 'active' : ''}">Both</button></div><div class="versus-selectors"><select id="selA">${names.map(n => `<option value="${n}" ${n === a ? 'selected' : ''}>${n}</option>`).join('')}</select><span class="versus-vs">VS</span><select id="selB">${names.map(n => `<option value="${n}" ${n === b ? 'selected' : ''}>${n}</option>`).join('')}</select><button class="h2h-swap" id="swapH2H" type="button">⇄</button></div></div>
       <div id="versusResult"></div>
     </section>
   `;
@@ -2745,30 +3014,46 @@
 
     function recordDefinitions(ranked) {
       const eligible = ranked.filter(p => p.played > 0);
-      const top = (field, direction = 'desc', minPlayed = 0) => {
+      /* Everyone who shares the best value (ties included). zeroIsNothing: a best of 0 is not a record. */
+      const top = (field, direction = 'desc', minPlayed = 0, zeroIsNothing = true) => {
         const list = eligible.filter(p => p.played >= minPlayed && p[field] != null);
-        return [...list].sort((a, b) => direction === 'asc' ? a[field] - b[field] : b[field] - a[field])[0];
+        if (!list.length) return [];
+        const best = list.reduce((m, p) => direction === 'asc' ? Math.min(m, p[field]) : Math.max(m, p[field]), direction === 'asc' ? Infinity : -Infinity);
+        if (zeroIsNothing && best <= 0) return [];
+        return list.filter(p => Math.abs(p[field] - best) < 1e-9);
       };
+      const rec = (icon, label, field, holders, value, note) => ({icon, label, field, holders, player: holders[0], value, note});
       return [
-        {icon:'🏆', label:'Most wins', field:'wins', player:top('wins'), value:p => p.wins + (p.wins === 1 ? ' win' : ' wins'), note:'Race victories this season'},
-        {icon:'🔥', label:'Longest win streak', field:'maxWinStreak', player:top('maxWinStreak'), value:p => p.maxWinStreak + ' in a row', note:'Consecutive editions won'},
-        {icon:'✨', label:'Longest podium streak', field:'maxPodiumStreak', player:top('maxPodiumStreak'), value:p => p.maxPodiumStreak + ' in a row', note:'Consecutive top-three finishes'},
-        {icon:'🥉', label:'Most podiums', field:'podiums', player:top('podiums'), value:p => p.podiums + (p.podiums === 1 ? ' podium' : ' podiums'), note:'Top-three finishes'},
-        {icon:'🎯', label:'Best average placement', field:'avgPlacement', player:top('avgPlacement', 'asc', 3), value:p => p.avgPlacement.toFixed(2), note:'Minimum 3 editions played · lower is better'},
-        {icon:'⚡', label:'Highest win rate', field:'winRate', player:top('winRate', 'desc', 3), value:p => Math.round(p.winRate * 100) + '%', note:'Minimum 3 editions played'},
-        {icon:'📈', label:'Most points', field:'points', player:top('points'), value:p => p.points + ' pts', note:'Total points earned'},
-        {icon:'🎮', label:'Most appearances', field:'played', player:top('played'), value:p => p.played + ' editions', note:'Most races entered'}
-      ];
+        rec('🏆', 'Most wins', 'wins', top('wins'), p => p.wins + (p.wins === 1 ? ' win' : ' wins'), 'Race victories this season'),
+        rec('🔥', 'Longest win streak', 'maxWinStreak', top('maxWinStreak'), p => p.maxWinStreak + ' in a row', 'Consecutive editions won'),
+        rec('✨', 'Longest podium streak', 'maxPodiumStreak', top('maxPodiumStreak'), p => p.maxPodiumStreak + ' in a row', 'Consecutive top-three finishes'),
+        rec('🥉', 'Most podiums', 'podiums', top('podiums'), p => p.podiums + (p.podiums === 1 ? ' podium' : ' podiums'), 'Top-three finishes'),
+        rec('🎯', 'Best average placement', 'avgPlacement', top('avgPlacement', 'asc', 3, false), p => p.avgPlacement.toFixed(2), 'Minimum 3 editions played · lower is better'),
+        rec('⚡', 'Highest win rate', 'winRate', top('winRate', 'desc', 3), p => Math.round(p.winRate * 100) + '%', 'Minimum 3 editions played'),
+        rec('📈', 'Most points', 'points', top('points'), p => p.points + ' pts', 'Total points earned'),
+        rec('🎮', 'Most appearances', 'played', top('played'), p => p.played + ' editions', 'Most races entered')
+      ].concat(GAME === 'tm20' ? [
+        rec('🔟', 'Most top-10 finishes', 'top10', top('top10'), p => p.top10 + (p.top10 === 1 ? ' finish' : ' finishes'), 'Scoring positions (1st-10th)'),
+        rec('🧱', 'Longest top-10 streak', 'maxTop10Streak', top('maxTop10Streak'), p => p.maxTop10Streak + ' in a row', 'Consecutive editions in the top 10')
+      ] : []);
     }
 
     function recordCard(record) {
-      const p = record.player;
-      if (!p) return `<div class="record-card"><div class="record-icon">${record.icon}</div><div class="record-label">${record.label}</div><div class="record-value">—</div><div class="record-note">Not enough results yet</div></div>`;
-      return `<a class="record-card" href="#/player/${encodeURIComponent(p.name)}"><div class="record-icon">${record.icon}</div><div class="record-label">${record.label}</div><div class="record-value">${record.value(p)}</div><div class="record-holder">${avatarHTML(p.name, 28)} <span>${p.name}</span></div><div class="record-note">${record.note}</div></a>`;
+      const holders = record.holders || (record.player ? [record.player] : []);
+      const head = `<div class="record-icon">${record.icon}</div><div class="record-label">${record.label}</div>`;
+      if (!holders.length) return `<div class="record-card">${head}<div class="record-value">—</div><div class="record-note">Not enough results yet</div></div>`;
+      const p = holders[0];
+      if (holders.length === 1) {
+        return `<a class="record-card" href="#/player/${encodeURIComponent(p.name)}">${head}<div class="record-value">${record.value(p)}</div><div class="record-holder">${avatarHTML(p.name, 28)} <span>${p.name}</span></div><div class="record-note">${record.note}</div></a>`;
+      }
+      const MAX = 6;
+      const chips = holders.slice(0, MAX).map(h => `<a class="record-chip" href="#/player/${encodeURIComponent(h.name)}">${avatarHTML(h.name, 24)}<span>${escapeHtml(h.name)}</span></a>`).join('');
+      const more = holders.length > MAX ? `<span class="record-chip more">+${holders.length - MAX} more</span>` : '';
+      return `<div class="record-card shared">${head}<div class="record-value">${record.value(p)}</div><div class="record-shared-badge">🤝 Shared record · ${holders.length} players</div><div class="record-holders">${chips}${more}</div><div class="record-note">${record.note}</div></div>`;
     }
 
     function renderRecords(season = 's2') {
-      main.innerHTML = `<div class="compact-page-heading"><h1>Records</h1><p>Season leaders for wins, consistency, streaks, and more.</p></div><div class="toolbar"><span class="toolbar-label">Season</span><div class="season-picker"><button data-record-season="s2" class="${season === 's2' ? 'active' : ''}">Season 2</button><button data-record-season="s1" class="${season === 's1' ? 'active' : ''}">Season 1</button><button data-record-season="both" class="${season === 'both' ? 'active' : ''}">Both</button></div></div><div id="recordContent" class="record-grid"><div class="loader"><div class="spinner"></div> Opening the record book…</div></div>`;
+      main.innerHTML = `<div class="compact-page-heading"><h1>Records</h1><p>Season leaders for wins, consistency, streaks, and more.</p></div><div class="toolbar"><span class="toolbar-label">Season</span><div class="season-picker"><button data-record-season="s2" class="${season === 's2' ? 'active' : ''}">${S2L()}</button><button data-record-season="s1" class="${season === 's1' ? 'active' : ''}">Season 1</button><button data-record-season="both" class="${season === 'both' ? 'active' : ''}">Both</button></div></div><div id="recordContent" class="record-grid"><div class="loader"><div class="spinner"></div> Opening the record book…</div></div>`;
       main.querySelectorAll('[data-record-season]').forEach(b => b.addEventListener('click', () => renderRecords(b.dataset.recordSeason)));
       seasonSource(season).then(data => {
         const host = document.getElementById('recordContent'); if (!host) return;
@@ -2798,7 +3083,7 @@
     }
 
     function renderRivalries(season = 's2', minShared = 3, selectedPlayer = '') {
-      main.innerHTML = `<div class="compact-page-heading"><h1>Rivalries</h1><p>Compare recurring matchups, or focus on one racer’s opponents.</p></div><div class="toolbar"><span class="toolbar-label">Season</span><div class="season-picker"><button data-rival-season="s2" class="${season === 's2' ? 'active' : ''}">Season 2</button><button data-rival-season="s1" class="${season === 's1' ? 'active' : ''}">Season 1</button><button data-rival-season="both" class="${season === 'both' ? 'active' : ''}">Both</button></div><span class="toolbar-label" style="margin-left:8px">Player</span><select id="rivalPlayer" aria-label="Choose a player’s rivalries"><option>Loading players…</option></select><span class="toolbar-label" style="margin-left:8px">Minimum shared</span><div class="season-picker"><button data-rival-min="3" class="${minShared === 3 ? 'active' : ''}">3+</button><button data-rival-min="5" class="${minShared === 5 ? 'active' : ''}">5+</button><button data-rival-min="8" class="${minShared === 8 ? 'active' : ''}">8+</button></div></div><section><div style="display:flex;justify-content:space-between;gap:12px;align-items:end;margin-bottom:14px"><h2 id="rivalryHeading" class="section-title" style="margin:0">Closest rivalries</h2><span style="color:var(--muted);font-size:12px">Even records · repeat races · close finishes</span></div><div id="rivalryContent" class="rivalry-grid"><div class="loader"><div class="spinner"></div> Finding matchups…</div></div></section>`;
+      main.innerHTML = `<div class="compact-page-heading"><h1>Rivalries</h1><p>Compare recurring matchups, or focus on one racer’s opponents.</p></div><div class="toolbar"><span class="toolbar-label">Season</span><div class="season-picker"><button data-rival-season="s2" class="${season === 's2' ? 'active' : ''}">${S2L()}</button><button data-rival-season="s1" class="${season === 's1' ? 'active' : ''}">Season 1</button><button data-rival-season="both" class="${season === 'both' ? 'active' : ''}">Both</button></div><span class="toolbar-label" style="margin-left:8px">Player</span><select id="rivalPlayer" aria-label="Choose a player’s rivalries"><option>Loading players…</option></select><span class="toolbar-label" style="margin-left:8px">Minimum shared</span><div class="season-picker"><button data-rival-min="3" class="${minShared === 3 ? 'active' : ''}">3+</button><button data-rival-min="5" class="${minShared === 5 ? 'active' : ''}">5+</button><button data-rival-min="8" class="${minShared === 8 ? 'active' : ''}">8+</button></div></div><section><div style="display:flex;justify-content:space-between;gap:12px;align-items:end;margin-bottom:14px"><h2 id="rivalryHeading" class="section-title" style="margin:0">Closest rivalries</h2><span style="color:var(--muted);font-size:12px">Even records · repeat races · close finishes</span></div><div id="rivalryContent" class="rivalry-grid"><div class="loader"><div class="spinner"></div> Finding matchups…</div></div></section>`;
       main.querySelectorAll('[data-rival-season]').forEach(b => b.addEventListener('click', () => renderRivalries(b.dataset.rivalSeason, minShared, selectedPlayer)));
       main.querySelectorAll('[data-rival-min]').forEach(b => b.addEventListener('click', () => renderRivalries(season, Number(b.dataset.rivalMin), selectedPlayer)));
       seasonSource(season).then(data => {
@@ -2986,8 +3271,41 @@
     }
 
     /* ============ SEASON COMPARISON ============ */
-    const PLAYER_ALIASES = {lildemo: 'demo', caster: 'c4ster', elliot: 'eliot'};
-    const playerKey = name => PLAYER_ALIASES[name.toLowerCase().replace(/[^a-z0-9]/g, '')] || name.toLowerCase().replace(/[^a-z0-9]/g, '');
+    /* Different spellings of the same person -> one identity key. Left side = the spelling with
+       everything except letters/digits removed and lowercased. Add new ones here. */
+    const PLAYER_ALIASES = {
+      lildemo: 'demo', caster: 'c4ster', elliot: 'eliot',
+      elliott: 'eliot', qqkewkew: 'qq', midnighteuphoria: 'midnight'
+    };
+    /* A trailing "(late upload)" etc. from TAS Exchange entrant names is not part of the name. */
+    const stripNote = name => String(name == null ? '' : name).replace(/\s*\([^)]*\)\s*$/, '').trim();
+    const playerKey = name => {
+      const base = stripNote(name).toLowerCase().replace(/[^a-z0-9]/g, '');
+      return PLAYER_ALIASES[base] || base;
+    };
+    /* Preferred spelling shown for a merged player in TM2020 when the TMNF data doesn't already settle it. */
+    const TM20_DISPLAY_NAMES = {eliot: 'Elliot', qq: 'QQ', vogtek: 'Vogtek', midnight: 'Midnight'};
+    function canonicalizeDataset(d) {
+      const known = {};
+      const addKnown = list => (list || []).forEach(n => {const k = playerKey(n); if (!known[k]) known[k] = n;});
+      const tmnf = GAME === 'tmnf' ? RAW : DATA.tmnf;
+      if (tmnf) addKnown(tmnf.players);
+      if (typeof SEASON_1 !== 'undefined' && SEASON_1) addKnown(SEASON_1.players);
+      const display = {};
+      const nameFor = n => {
+        const k = playerKey(n);
+        if (!display[k]) display[k] = TM20_DISPLAY_NAMES[k] || known[k] || stripNote(n);
+        return display[k];
+      };
+      const players = [];
+      (d.players || []).forEach(n => {const c = nameFor(n); if (!players.includes(c)) players.push(c);});
+      const editions = (d.editions || []).map(e => {
+        const results = {};
+        Object.entries(e.results).forEach(([n, place]) => {const c = nameFor(n); if (results[c] == null || place < results[c]) results[c] = place;});
+        return {...e, results};
+      });
+      return {editions, players};
+    }
     function discordIdFor(name) {
       const key = playerKey(name);
       if (DISCORD_IDS[key]) return DISCORD_IDS[key];
@@ -3067,7 +3385,7 @@
         main.innerHTML = `
       <section><div class="season-intro"><h2 class="section-title">Season 1 ↔ Season 2</h2><p>Two seasons, one evolving field. Compare player results, participation and rank movement side by side.</p></div>
       <div class="compare-spotlight"><div class="compare-spotlight-card"><div class="kicker">Season leaders</div><b><strong>S1</strong> ${s1Leader?.name || '—'} <span style="color:var(--muted);font-size:13px;font-weight:500">${s1Leader?.points || 0} pts</span></b><b><strong>S2</strong> ${s2Leader?.name || '—'} <span style="color:var(--muted);font-size:13px;font-weight:500">${s2Leader?.points || 0} pts</span></b></div><div class="compare-spotlight-card compact"><div class="kicker">Returning</div><b>${shared.length}</b><span style="color:var(--muted);font-size:12px">players raced both</span></div></div>
-      <div class="grid cards">${statCard('Season 1', s1.editions.length, `editions · ${s1.players.length} registered players`)}${statCard('Season 2', s2.editions.length, `editions · ${two.length} active players`)}${statCard('Biggest rank gain', biggest ? biggest.name : '—', biggest ? `▲ ${biggest.delta} · #${biggest.s1.rank} → #${biggest.s2.rank}` : 'No matched players')}</div></section>
+      <div class="grid cards">${statCard('Season 1', s1.editions.length, `editions · ${s1.players.length} registered players`)}${statCard(S2L(), s2.editions.length, `editions · ${two.length} active players`)}${statCard('Biggest rank gain', biggest ? biggest.name : '—', biggest ? `▲ ${biggest.delta} · #${biggest.s1.rank} → #${biggest.s2.rank}` : 'No matched players')}</div></section>
       <section class="panel"><h2 class="section-title">Player comparison</h2><p class="compare-hint">↑ Ascending · ↓ Descending · blank entries always remain at the bottom.</p><div id="comparisonTable"></div></section>`;
         renderComparisonTable(rows);
       }).catch(err => {main.innerHTML = `<div class="panel"><h2 class="section-title">Season 1 unavailable</h2><p style="color:var(--muted)">${err.message} Check that the Season 1 sheet remains published as CSV.</p></div>`;});
@@ -3078,7 +3396,7 @@
         const s1Ranked = seasonStats(s1), s2Ranked = seasonStats(RAW), rows = comparisonRows(s1Ranked, s2Ranked), s1Board = s1Ranked.slice(0, 25), s2Board = s2Ranked.slice(0, 25);
         const mixedBoard = rows.map(r => ({name: r.name, points: r.total, played: r.played, wins: r.wins, podiums: r.podiums})).sort((a, b) => b.points - a.points || b.wins - a.wins).slice(0, 25);
         const table = (board, label) => `<section class="panel"><h2 class="section-title">${label}</h2><div style="overflow:auto"><table class="data-table"><thead><tr><th>#</th><th>Player</th><th>Points</th><th>Played</th><th>Wins</th><th>Podiums</th></tr></thead><tbody>${board.map((p, i) => `<tr><td>${i + 1}</td><td><b>${p.name}</b></td><td style="color:var(--accent);font-weight:800">${p.points}</td><td>${p.played}</td><td>${p.wins}</td><td>${p.podiums}</td></tr>`).join('')}</tbody></table></div></section>`;
-        main.innerHTML = `<section><h2 class="section-title">Season standings</h2><p style="color:var(--muted);margin:-4px 0 18px;">Season leaderboards remain separate. The all-time table adds both seasons after alias and one-letter name matching.</p><div class="grid cards">${statCard('Season 1', s1.editions.length, 'editions')}${statCard('Season 2', RAW.editions.length, 'editions')}${statCard('Players in both', rows.filter(r => r.s1 && r.s2).length, 'after alias matching')}</div></section><div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(420px,1fr));">${table(s1Board, 'Season 1 leaderboard')}${table(s2Board, 'Season 2 leaderboard')}${table(mixedBoard, 'All-time overall')}</div>`;
+        main.innerHTML = `<section><h2 class="section-title">Season standings</h2><p style="color:var(--muted);margin:-4px 0 18px;">Season leaderboards remain separate. The all-time table adds both seasons after alias and one-letter name matching.</p><div class="grid cards">${statCard('Season 1', s1.editions.length, 'editions')}${statCard(S2L(), RAW.editions.length, 'editions')}${statCard('Players in both', rows.filter(r => r.s1 && r.s2).length, 'after alias matching')}</div></section><div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(420px,1fr));">${table(s1Board, 'Season 1 leaderboard')}${table(s2Board, 'Season 2 leaderboard')}${table(mixedBoard, 'All-time overall')}</div>`;
       }).catch(err => {main.innerHTML = `<div class="panel"><h2 class="section-title">All-time view unavailable</h2><p style="color:var(--muted)">${err.message}</p></div>`;});
     }
 
@@ -3087,6 +3405,24 @@
     function render() {
       document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
       const route = currentRoute();
+      if (ROUTE_GAME === 'tm20' && !DATA.tm20) {
+        applyTheme('tm20');
+        main.innerHTML = `<div class="loader"><div class="spinner"></div> Loading TM2020 data...</div>`;
+        loadTM20().then(() => render()).catch(err => {
+          main.innerHTML = `<div class="panel" style="max-width:640px;margin:20px auto;"><h2 class="section-title">TM2020 data unavailable</h2><p style="color:var(--muted)">${escapeHtml(err.message)}</p><button class="refresh-btn" id="tm20Retry">↻ Try again</button></div>`;
+          document.getElementById('tm20Retry').addEventListener('click', () => render());
+        });
+        return;
+      }
+      setGame(ROUTE_GAME);
+      if (GAME === 'tm20') {
+        if (['season-compare', 'all-time', 'videos'].includes(route[0])) {location.hash = '#/tm20'; return;}
+        if (!RAW.editions.length) {
+          const active = document.querySelector(`nav a[data-route="/${route[0] || ''}"]`); if (active) active.classList.add('active');
+          main.innerHTML = `<div class="empty-state" style="padding:60px 20px;"><div style="font-size:42px;margin-bottom:10px">🏁</div><b style="font-size:18px;color:var(--text)">No TM2020 results yet</b><br>The first edition will appear here as soon as results are added to the TM2020 sheet.</div>`;
+          return;
+        }
+      }
       if (route.length === 0) {
         document.querySelector('nav a[data-route="/"]').classList.add('active');
         renderHome();
@@ -3136,10 +3472,10 @@
       // SEASON_1 may not have finished its background preload yet - search
       // just covers Season 2 until it has, then quietly starts covering both.
       const s2Keys = new Set(RAW.players.map(playerKey));
-      const s1Keys = SEASON_1 ? new Set(SEASON_1.players.map(playerKey)) : new Set();
+      const s1Keys = SEASON_1 && GAME !== 'tm20' ? new Set(SEASON_1.players.map(playerKey)) : new Set();
       const nameByKey = {};
       RAW.players.forEach(n => nameByKey[playerKey(n)] = n);
-      if (SEASON_1) SEASON_1.players.forEach(n => {if (!(playerKey(n) in nameByKey)) nameByKey[playerKey(n)] = n;});
+      if (SEASON_1 && GAME !== 'tm20') SEASON_1.players.forEach(n => {if (!(playerKey(n) in nameByKey)) nameByKey[playerKey(n)] = n;});
 
       const playerMatches = [...new Set([...s2Keys, ...s1Keys])]
         .map(k => nameByKey[k])
@@ -3148,16 +3484,16 @@
 
       const editionMatches = [
         ...RAW.editions.filter(e => String(e.edition).toLowerCase().includes(q)).map(e => ({edition: e.edition, season: 's2'})),
-        ...(SEASON_1 ? SEASON_1.editions.filter(e => String(e.edition).toLowerCase().includes(q)).map(e => ({edition: e.edition, season: 's1'})) : [])
+        ...(SEASON_1 && GAME !== 'tm20' ? SEASON_1.editions.filter(e => String(e.edition).toLowerCase().includes(q)).map(e => ({edition: e.edition, season: 's1'})) : [])
       ].slice(0, 4);
 
       const items = [
         ...playerMatches.map(n => {
           const key = playerKey(n);
           const season = s2Keys.has(key) && s1Keys.has(key) ? 'all' : (s1Keys.has(key) ? 's1' : 's2');
-          return {label: `👤 ${n}`, href: `#/player/${season}/${encodeURIComponent(n)}`};
+          return {label: `👤 ${n}`, href: `${GAME === 'tm20' ? '#/tm20' : '#'}/player/${season}/${encodeURIComponent(n)}`};
         }),
-        ...editionMatches.map(e => ({label: `🏁 Edition ${e.edition} (${e.season === 's1' ? 'S1' : 'S2'})`, href: `#/edition/${e.season}/${encodeURIComponent(e.edition)}`}))
+        ...editionMatches.map(e => ({label: `🏁 Edition ${e.edition} (${e.season === 's1' ? 'S1' : (GAME === 'tm20' ? 'TM20' : 'S2')})`, href: `${GAME === 'tm20' ? '#/tm20' : '#'}/edition/${e.season}/${encodeURIComponent(e.edition)}`}))
       ];
       if (!items.length) {searchResults.style.display = 'none'; return;}
       searchResults.innerHTML = items.map(it => `<div data-href="${it.href}">${it.label}</div>`).join('');
@@ -3185,7 +3521,7 @@
       banner.id = 'statusBanner';
       banner.style.cssText = `
     max-width:1200px;margin:0 auto 20px;padding:12px 18px;border-radius:12px;
-    background:rgba(233,251,89,.08);border:1px solid rgba(233,251,89,.3);
+    background:rgba(var(--accent-rgb),.08);border:1px solid rgba(var(--accent-rgb),.3);
     display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--text);
   `;
       const label = dataSourceStatus === 'fallback'
@@ -3250,6 +3586,8 @@
     /* ============ INIT ============ */
     async function init() {
       loadAvatarOverridesCache();
+      prefillAvatarsFromStore();
+      GAME = 'tmnf'; DATA.tm20 = null; // RAW below is always the TMNF data; TM2020 reloads on demand
       main.innerHTML = `<div class="loader"><div class="spinner"></div> Loading SpeedTAS data...</div>`;
       const existingBanner = document.getElementById('statusBanner');
       if (existingBanner) existingBanner.remove();
@@ -3275,12 +3613,14 @@
           dataSourceStatus = 'fallback';
           render();
           renderStatusBanner();
+          loadDiscordProfiles().then(() => render()); // pictures don't depend on the sheet being live
         } catch (err2) {
           console.error(err2);
           renderManualPanel();
         }
       }
     }
+    new MutationObserver(() => prefixLinks(main)).observe(main, {childList: true, subtree: true});
     init();
   </script>
 

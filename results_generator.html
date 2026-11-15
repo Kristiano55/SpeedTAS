@@ -8,32 +8,41 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
+:root{--accent:#e9fb59;--accent-rgb:233,251,89;--on-accent:#0a0a0c}
+body.game-tm20{--accent:#59d6fb;--accent-rgb:89,214,251}
 body{background:#0b0b0d;color:#e8e8ea;font-family:'Space Grotesk',sans-serif;min-height:100vh;display:flex;justify-content:center;padding:32px 16px}
-.wrap{width:100%;max-width:680px}
-.top{display:flex;align-items:baseline;gap:10px;margin-bottom:4px}
+.wrap{width:100%;max-width:720px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:4px;flex-wrap:wrap}
 .logo{font-size:24px;font-weight:600;letter-spacing:-0.5px;color:#fff}
-.logo span{color:#f97316}
+.logo span{color:var(--accent)}
 .sub{font-size:13px;color:#66667a;margin-bottom:24px}
 
-.card{background:#1a1a1e;border:0.5px solid #2a2a32;border-radius:12px;padding:20px 22px;margin-bottom:16px}
+.game-switch{display:inline-flex;gap:4px;padding:3px;border:1px solid #2a2a32;border-radius:999px;background:#141418}
+.game-switch button{width:auto;background:transparent;color:#8a8a9a;border-radius:999px;padding:6px 14px;font-size:13px;font-weight:600}
+.game-switch button.active{background:var(--accent);color:var(--on-accent)}
+
+.card{background:#1a1a1e;border:0.5px solid #2a2a32;border-radius:12px;padding:20px 22px;margin-bottom:16px;border-top:2px solid rgba(var(--accent-rgb),.6)}
 
 details.cfg{background:#141418;border:0.5px solid #24242c;border-radius:10px;padding:2px 16px;margin-bottom:16px}
 details.cfg summary{cursor:pointer;font-size:12px;color:#8a8a9a;padding:10px 0;list-style:none;display:flex;align-items:center;gap:6px}
 details.cfg summary::-webkit-details-marker{display:none}
 details.cfg summary::before{content:'\2699';font-size:12px}
+.cfg-head{font-size:10.5px;color:#8a8a9a;text-transform:uppercase;letter-spacing:.6px;margin:6px 0 8px;grid-column:1/-1}
 .cfg-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-bottom:14px}
-.cfg-grid label{font-size:11px;color:#55556a;display:block;margin-bottom:4px}
+.cfg-grid label{font-size:11px;color:#6a6a7e;display:block;margin-bottom:4px}
 .cfg-grid input{width:100%}
+@media (max-width:560px){.cfg-grid{grid-template-columns:1fr}}
 
 label.fl{font-size:12px;color:#9999a8;display:block;margin-bottom:5px}
 input,textarea{background:#141418;border:0.5px solid #2e2e3c;color:#e8e8f0;border-radius:7px;padding:9px 12px;font-size:14px;font-family:inherit;width:100%}
-input:focus,textarea:focus{outline:none;border-color:#f97316}
+input:focus,textarea:focus{outline:none;border-color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 .row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px}
 .row .fld{flex:1;min-width:160px}
 .row .fld.narrow{flex:0 0 130px;min-width:0}
 
-button{background:#f97316;color:#181109;border:none;border-radius:7px;padding:11px 20px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;transition:filter .15s;width:100%}
+button{background:var(--accent);color:var(--on-accent);border:none;border-radius:7px;padding:11px 20px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;transition:filter .15s;width:100%}
 button:hover{filter:brightness(1.08)}
 button:active{filter:brightness(0.92)}
 button.secondary{background:#242430;color:#c8c8d4;width:auto;padding:8px 14px;font-size:12.5px}
@@ -43,138 +52,225 @@ button:disabled{opacity:.45;cursor:default;filter:none}
 .status.err{color:#f87171}
 .status.ok{color:#34d399}
 .status.warn{color:#fbbf24}
+.status a{color:inherit}
 
 .section-title{font-size:11px;font-weight:500;color:#66667a;text-transform:uppercase;letter-spacing:.6px;margin:20px 0 10px}
 
-table.rt{width:100%;border-collapse:collapse;font-size:13px}
+.rt-wrap{overflow-x:auto}
+table.rt{width:100%;border-collapse:collapse;font-size:13px;min-width:480px}
 table.rt th{font-size:10.5px;color:#55556a;text-transform:uppercase;letter-spacing:.5px;text-align:left;padding:5px 6px;border-bottom:0.5px solid #26262e}
 table.rt td{padding:5px 6px;border-bottom:0.5px solid #1e1e24;vertical-align:middle}
-table.rt td.rk{color:#f97316;font-weight:600;width:34px}
+table.rt td.rk{color:var(--accent);font-weight:600;width:34px}
 table.rt td.nm{color:#e8e8f0;white-space:nowrap}
+table.rt td.nm small{display:block;color:#66667a;font-size:10.5px}
 table.rt input{padding:5px 8px;font-size:12.5px}
-table.rt td.idc{width:170px}
-table.rt td.tmc{width:80px}
+table.rt input.bad{border-color:#f87171}
+table.rt td.idc{width:180px}
+table.rt td.tmc{width:96px}
 
 .out-wrap{position:relative;margin-top:8px}
 textarea#output{height:340px;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.6;resize:vertical;white-space:pre}
 .copy-btn{position:absolute;top:10px;right:10px}
 
-.hint{font-size:11.5px;color:#4d4d5c;margin-top:10px;line-height:1.5}
+.hint{font-size:11.5px;color:#55556a;margin-top:10px;line-height:1.5}
 .hidden{display:none}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <div class="top"><div class="logo">Speed<span>TAS</span></div></div>
-  <div class="sub">Type the edition and clip link &mdash; placements, Discord IDs and times are all pulled automatically.</div>
+  <div class="top">
+    <div class="logo">Speed<span>TAS</span> results</div>
+    <div class="game-switch" role="group" aria-label="Game">
+      <button type="button" data-game="tmnf" class="active">TMNF</button>
+      <button type="button" data-game="tm20">TM2020</button>
+    </div>
+  </div>
+  <div class="sub" id="subline">Pick the game, type the edition and clip link &mdash; placements, Discord IDs and times are pulled automatically.</div>
 
   <details class="cfg">
-    <summary>Advanced settings (one-time setup)</summary>
+    <summary>Advanced settings (saved in this browser)</summary>
     <div class="cfg-grid">
+      <div class="cfg-head">Shared</div>
       <div>
-        <label>Google Sheet ID</label>
-        <input id="cfgSheetId" value="1g7M1IWvDlqmUkUWB6oSX-HKf7tCpAmaQK_nvNGBEppw">
+        <label for="cfgWorkerBase">Worker base URL</label>
+        <input id="cfgWorkerBase" data-cfg="workerBase">
       </div>
       <div>
-        <label>Discord role ID to ping</label>
-        <input id="cfgRoleId" value="1378340597223653517">
+        <label for="cfgSheetId">Main Google Sheet ID (Players tab, TMNF Editions)</label>
+        <input id="cfgSheetId" data-cfg="sheetId">
       </div>
       <div>
-        <label>Placements tab name</label>
-        <input id="cfgPlacementsTab" value="Editions">
+        <label for="cfgPlayersTab">Players tab name</label>
+        <input id="cfgPlayersTab" data-cfg="playersTab">
       </div>
       <div>
-        <label>Players tab name</label>
-        <input id="cfgPlayersTab" value="Players">
+        <label for="cfgPlacementsTab">TMNF placements tab name</label>
+        <input id="cfgPlacementsTab" data-cfg="placementsTab">
+      </div>
+
+      <div class="cfg-head">TMNF</div>
+      <div>
+        <label for="cfgRoleTmnf">Discord role ID to ping</label>
+        <input id="cfgRoleTmnf" data-cfg="role_tmnf">
       </div>
       <div>
-        <label>Worker base URL</label>
-        <input id="cfgWorkerBase" value="https://speedtas-api.kristianogeorgiev652.workers.dev">
+        <label for="cfgPatternTmnf">TMTAS Exchange event title</label>
+        <input id="cfgPatternTmnf" data-cfg="pattern_tmnf">
+      </div>
+      <div>
+        <label for="cfgNameTmnf">Competition name in the post</label>
+        <input id="cfgNameTmnf" data-cfg="name_tmnf">
+      </div>
+
+      <div class="cfg-head">TM2020</div>
+      <div>
+        <label for="cfgRoleTm20">Discord role ID to ping</label>
+        <input id="cfgRoleTm20" data-cfg="role_tm20">
+      </div>
+      <div>
+        <label for="cfgPatternTm20">TMTAS Exchange event title</label>
+        <input id="cfgPatternTm20" data-cfg="pattern_tm20">
+      </div>
+      <div>
+        <label for="cfgNameTm20">Competition name in the post</label>
+        <input id="cfgNameTm20" data-cfg="name_tm20">
       </div>
     </div>
+    <div class="hint" style="padding-bottom:6px">
+      TMNF placements come from the main sheet; TM2020 placements come from the Worker (<code>/data?season=tm20</code>),
+      which already knows the TM2020 sheet. Discord IDs come from the shared Players tab for both games &mdash;
+      spellings like "eliot"/"Elliot" or "QQ_kewkew"/"QQ" are matched automatically.
+    </div>
     <div class="hint" style="padding-bottom:12px">
-      The TMTAS Exchange event is found automatically by edition number &mdash; nothing to maintain there.
-      Placements and Players tabs must be published to web (File &rarr; Share &rarr; Publish to web &rarr; CSV).
-      For times to auto-fill, add an optional column to the Players tab with "TMX" (or "Exchange"/"Alias") in
-      the header, containing each player's TMTAS Exchange username where it differs from their sheet name.
-      One-time per player, not per edition &mdash; anyone without a row there still works, their time just
-      won't auto-fill until it's added.
+      The TMTAS Exchange event is found automatically from its title ("SpeedTAS Season2 #30", "SpeedTAS TM20 #5").
+      If it can't be found you can type the event ID in the field next to the edition.
+      For times, an optional Players-tab column with "TMX", "Exchange" or "Alias" in the header can hold a player's
+      exchange username when it's very different from their sheet name.
+      <button type="button" class="secondary" id="resetCfg" style="margin-top:8px;display:block">Reset settings to defaults</button>
     </div>
   </details>
 
   <div class="card">
     <div class="row" style="margin-bottom:0">
       <div class="fld narrow">
-        <label class="fl">Edition #</label>
+        <label class="fl" for="editionNum">Edition #</label>
         <input id="editionNum" type="number" min="1" placeholder="e.g. 27">
       </div>
       <div class="fld">
-        <label class="fl">Clip link</label>
+        <label class="fl" for="clipLink">Clip link</label>
         <input id="clipLink" placeholder="https://medal.tv/games/...">
       </div>
+      <div class="fld narrow">
+        <label class="fl" for="eventIdOverride">Event ID <span style="color:#55556a">(optional)</span></label>
+        <input id="eventIdOverride" type="number" min="1" placeholder="auto">
+      </div>
     </div>
-    <button id="genBtn" onclick="generate()">Generate results post</button>
-    <div id="status" class="status"></div>
+    <button id="genBtn" type="button" style="margin-top:14px">Generate TMNF results post</button>
+    <div id="status" class="status" role="status" aria-live="polite"></div>
 
     <div id="reviewBlock" class="hidden">
       <div class="section-title">Quick check &mdash; edit anything that's off</div>
-      <table class="rt">
-        <thead><tr><th>#</th><th>Player</th><th>Discord ID</th><th>Time</th></tr></thead>
-        <tbody id="rosterBody"></tbody>
-      </table>
+      <div class="rt-wrap">
+        <table class="rt">
+          <thead><tr><th>#</th><th>Player</th><th>Discord ID</th><th>Time</th></tr></thead>
+          <tbody id="rosterBody"></tbody>
+        </table>
+      </div>
     </div>
 
     <div class="out-wrap">
-      <textarea id="output" readonly placeholder="Your formatted results message will appear here..."></textarea>
-      <button class="copy-btn secondary" onclick="copyOutput()">Copy</button>
+      <textarea id="output" readonly placeholder="Your formatted results message will appear here..." aria-label="Results message"></textarea>
+      <button class="copy-btn secondary" type="button" id="copyBtn">Copy</button>
     </div>
   </div>
 
 </div>
 
 <script>
-let currentRoster = [];
-
-/** Sheet name -> TMTAS Exchange username, for players whose exchange
- *  username doesn't match what's used on Discord/the sheet. Edit this
- *  list directly whenever you spot a mismatch in the console log or a
- *  blank time — one-time per player, not per edition. Anyone not listed
- *  here just falls back to matching on their sheet name directly (which
- *  is why e.g. "Sneak" needs no entry at all).
- *
- *  Filled in from edition 30's results as a starting point — the ones
- *  marked "guess" weren't 100% certain from that data alone, so double
- *  check those against the actual TMTAS Exchange profile before trusting
- *  them for real.
- */
-const EXCHANGE_ALIASES = {
-  'Midnight': 'MidnightEuphoria',
-  'Caleb': 'CA1EBYT',
-  'QQ': 'QQ_kewkew',
-  'Elliot': 'Elliott',
-  'Exix': 'exix77',
-  'LilDemo': 'LittleD3m0', // guess — confirm this is the right person
-  // 'SheetName': 'NicoReborn', // unmatched in edition 30 — add once you know who this is
+/* ============ SETTINGS ============ */
+const DEFAULTS = {
+  workerBase: 'https://speedtas-api.kristianogeorgiev652.workers.dev',
+  sheetId: '1g7M1IWvDlqmUkUWB6oSX-HKf7tCpAmaQK_nvNGBEppw',
+  playersTab: 'Players',
+  placementsTab: 'Editions',
+  role_tmnf: '1378340597223653517',
+  role_tm20: '1378340597223653517',
+  pattern_tmnf: 'SpeedTAS Season2',
+  pattern_tm20: 'SpeedTAS TM20',
+  name_tmnf: 'SpeedTAS',
+  name_tm20: 'SpeedTAS TM2020'
 };
-const EXCHANGE_ALIASES_NORM = {};
-Object.entries(EXCHANGE_ALIASES).forEach(([sheetName, alias])=>{
-  EXCHANGE_ALIASES_NORM[sheetName] = alias; // keyed by exact sheet name; normalized at lookup time
-});
+const SETTINGS_KEY = 'speedtas_results_generator_cfg';
+const GAME_KEY = 'speedtas_results_generator_game';
 
+/* Same as the dashboard: tmtas.exchange event IDs scan range per game, plus known events that always win. */
+const EVENT_ID_RANGE = {tmnf: [40, 300], tm20: [200, 600]};
+const EVENT_ID_OVERRIDES = {tmnf: {}, tm20: {'1': 229, '2': 240, '3': 251, '4': 258}};
+/* Hosts sometimes upload a competitor's run under their own name (see matchEntrants). */
+const EVENT_HOSTS = {tmnf: ['Kristiano'], tm20: ['Kristiano']};
+
+let GAME = 'tmnf';
+let currentRoster = [];
+let currentEvent = null;
+
+function loadSettings(){
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}') || {}; } catch(e){}
+  document.querySelectorAll('[data-cfg]').forEach(inp=>{
+    const k = inp.dataset.cfg;
+    inp.value = saved[k] != null && saved[k] !== '' ? saved[k] : DEFAULTS[k];
+    inp.addEventListener('change', saveSettings);
+  });
+}
+function saveSettings(){
+  const out = {};
+  document.querySelectorAll('[data-cfg]').forEach(inp=>{ out[inp.dataset.cfg] = inp.value.trim(); });
+  try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(out)); } catch(e){}
+  buildMessage();
+}
 function cfg(){
+  const v = k => (document.querySelector(`[data-cfg="${k}"]`).value || '').trim() || DEFAULTS[k];
   return {
-    sheetId: document.getElementById('cfgSheetId').value.trim(),
-    roleId: document.getElementById('cfgRoleId').value.trim(),
-    placementsTab: document.getElementById('cfgPlacementsTab').value.trim(),
-    playersTab: document.getElementById('cfgPlayersTab').value.trim(),
-    workerBase: document.getElementById('cfgWorkerBase').value.trim()
+    workerBase: v('workerBase').replace(/\/+$/,''),
+    sheetId: v('sheetId'),
+    playersTab: v('playersTab'),
+    placementsTab: v('placementsTab'),
+    roleId: (document.querySelector(`[data-cfg="role_${GAME}"]`).value || '').trim(), // blank = no ping
+    pattern: v('pattern_' + GAME),
+    compName: v('name_' + GAME)
   };
 }
 
-function setStatus(msg, kind){
+/* ============ GAME SWITCH ============ */
+function setGame(g){
+  GAME = g === 'tm20' ? 'tm20' : 'tmnf';
+  try { localStorage.setItem(GAME_KEY, GAME); } catch(e){}
+  document.body.classList.toggle('game-tm20', GAME === 'tm20');
+  document.querySelectorAll('.game-switch button').forEach(b=>{
+    const on = b.dataset.game === GAME;
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-pressed', on);
+  });
+  document.getElementById('genBtn').textContent = `Generate ${GAME === 'tm20' ? 'TM2020' : 'TMNF'} results post`;
+  document.title = `SpeedTAS Results Generator · ${GAME === 'tm20' ? 'TM2020' : 'TMNF'}`;
+  // A roster from the other game must never leak into this game's post.
+  currentRoster = []; currentEvent = null;
+  document.getElementById('reviewBlock').classList.add('hidden');
+  document.getElementById('output').value = '';
+  setStatus('');
+}
+
+/* ============ HELPERS ============ */
+function setStatus(msg, kind, link){
   const el = document.getElementById('status');
   el.textContent = msg;
+  if(link){
+    el.append(' ');
+    const a = document.createElement('a');
+    a.href = link; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'Open event ↗';
+    el.append(a);
+  }
   el.className = 'status' + (kind ? ' ' + kind : '');
 }
 
@@ -185,6 +281,14 @@ async function retryAsync(fn, attempts=3, delay=1200){
     catch(e){ lastErr=e; if(i<attempts-1) await new Promise(r=>setTimeout(r,delay)); }
   }
   throw lastErr;
+}
+
+async function fetchJson(url, label){
+  const r = await fetch(url);
+  const data = await r.json().catch(()=>null);
+  if(!data) throw new Error(`HTTP ${r.status} from ${label} — is the Worker deployed with this route?`);
+  if(!r.ok && !data.error) throw new Error(`HTTP ${r.status} from ${label}`);
+  return data;
 }
 
 function parseCSV(text){
@@ -209,45 +313,47 @@ function parseCSV(text){
 async function fetchSheetCSV(sheetId, tabName){
   const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tabName)}`;
   const res = await fetch(url);
-  if(!res.ok) throw new Error(`Couldn't load tab "${tabName}" (HTTP ${res.status}). Check the tab name and that it's published to web.`);
+  if(!res.ok) throw new Error(`Couldn't load tab "${tabName}" (HTTP ${res.status}). Check the tab name and that the sheet is shared/published.`);
   const text = await res.text();
-  if(text.trim().startsWith('<')) throw new Error(`Tab "${tabName}" isn't published to web (got an HTML error page instead of CSV).`);
+  if(text.trim().startsWith('<')) throw new Error(`Tab "${tabName}" isn't published to web (got an HTML page instead of CSV).`);
   return parseCSV(text);
 }
 
+/** Editions grid -> { editionNumber: { name: place } } */
 function parsePivot(rows){
   if(!rows.length) return {};
-  const header = rows[0];
-  const players = header.slice(1).map(h=>(h||'').trim());
+  const players = rows[0].slice(1).map(h=>(h||'').trim());
   const editions = {};
   for(let r=1;r<rows.length;r++){
     const row = rows[r];
     if(!row || !row[0]) continue;
     const m = String(row[0]).match(/\d+/);
     if(!m) continue;
-    const editionNum = parseInt(m[0],10);
     const values = {};
     players.forEach((p,idx)=>{
       const v = row[idx+1];
       if(p && v!==undefined && String(v).trim()!=='') values[p]=String(v).trim();
     });
-    editions[editionNum]=values;
+    editions[parseInt(m[0],10)]=values;
   }
   return editions;
 }
 
+/** Players tab -> { sheetName: { id, alias } }. Name is column A; the ID column is the one
+ *  whose header is "ID"/"Discord ID"/"Discord"; alias is any header mentioning TMX/Exchange/Alias. */
 function parsePlayers(rows){
   if(!rows.length) return {};
   const header = rows[0].map(h=>(h||'').trim().toLowerCase());
-  let idCol = header.findIndex(h=>h.includes('id'));
-  if(idCol===-1) idCol=1;
+  let idCol = header.findIndex(h=>['id','discord id','discordid','discord'].includes(h));
+  if(idCol===-1) idCol = header.findIndex(h=>/\bid\b/.test(h));
+  if(idCol===-1) idCol = 1;
   const aliasCol = header.findIndex(h=>h.includes('tmx')||h.includes('exchange')||h.includes('alias'));
   const map={};
   for(let r=1;r<rows.length;r++){
     const row=rows[r];
     if(!row || !row[0]) continue;
     const name=row[0].trim();
-    const id=(row[idCol]||'').trim();
+    const id=(row[idCol]||'').replace(/\s/g,'');
     const alias=aliasCol>=0 ? (row[aliasCol]||'').trim() : '';
     if(name) map[name]={ id, alias };
   }
@@ -258,28 +364,149 @@ function escapeHtml(s){
   return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-/** Loosens name matching just enough to survive scraping quirks — accents,
- *  zero-width/invisible characters, and stray whitespace — without doing
- *  any fuzzy/partial matching that could silently pair the wrong player. */
-function normalizeName(s){
-  return String(s)
-    .normalize('NFKD').replace(/[\u0300-\u036f]/g,'')
-    .replace(/[\u200B-\u200D\uFEFF]/g,'')
-    .replace(/\s+/g,' ')
-    .trim()
-    .toLowerCase();
+/* ============ NAME MATCHING (kept in sync with the dashboard) ============ */
+/* Different spellings of the same person -> one identity key. Left side = the spelling with
+   everything except letters/digits removed and lowercased. Same list as PLAYER_ALIASES in index.html. */
+const PLAYER_ALIASES = {
+  lildemo: 'demo', caster: 'c4ster', elliot: 'eliot',
+  elliott: 'eliot', qqkewkew: 'qq', midnighteuphoria: 'midnight'
+};
+/** Sheet name -> TMTAS Exchange username, for exchange names the key above can't link
+ *  (e.g. "Caleb" plays as "CA1EBYT"). Anyone not listed falls back to automatic matching. */
+const EXCHANGE_ALIASES = {
+  'Midnight': 'MidnightEuphoria',
+  'Caleb': 'CA1EBYT',
+  'QQ': 'QQ_kewkew',
+  'Elliot': 'Elliott',
+  'Exix': 'exix77',
+  'LilDemo': 'LittleD3m0', // guess — confirm this is the right person
+};
+/* A trailing "(late upload)" etc. from TAS Exchange entrant names is not part of the name. */
+const stripNote = name => String(name == null ? '' : name).replace(/\s*\([^)]*\)\s*$/, '').trim();
+function playerKey(name){
+  const base = stripNote(name)
+    .normalize('NFKD').replace(/[̀-ͯ]/g,'')
+    .toLowerCase().replace(/[^a-z0-9]/g,'');
+  return PLAYER_ALIASES[base] || base;
+}
+function oneLetterApart(a, b){
+  if (a === b) return true;
+  if (Math.abs(a.length - b.length) > 1) return false;
+  let i = 0, j = 0, edits = 0;
+  while (i < a.length && j < b.length) {if (a[i] === b[j]) {i++; j++;} else if (++edits > 1) return false; else if (a.length > b.length) i++; else if (b.length > a.length) j++; else {i++; j++;} }
+  return true;
+}
+const validDiscordId = id => /^\d{15,25}$/.test(String(id||''));
+
+/** Finds a roster player's row in the Players tab: exact name first, then the shared identity key
+ *  (so TM2020's "eliot" finds "Elliot"). */
+function findPlayerInfo(players, name){
+  if(players[name]) return {sheetName:name, ...players[name]};
+  const k = playerKey(name);
+  const hit = Object.keys(players).find(n=>playerKey(n)===k);
+  return hit ? {sheetName:hit, ...players[hit]} : null;
 }
 
-const DIGIT_EMOJI = ['0\uFE0F\u20E3','1\uFE0F\u20E3','2\uFE0F\u20E3','3\uFE0F\u20E3','4\uFE0F\u20E3','5\uFE0F\u20E3','6\uFE0F\u20E3','7\uFE0F\u20E3','8\uFE0F\u20E3','9\uFE0F\u20E3'];
+/** Pairs TMTAS Exchange entrants with roster entries. Each roster entry can be reached by its
+ *  sheet name, its Players-tab name, its Players-tab alias, or EXCHANGE_ALIASES; a one-letter
+ *  typo is accepted only when exactly one player is that close. */
+function matchEntrants(entrants, entries, hosts){
+  const byKey = {};
+  entries.forEach(e=>{
+    [e.name, e.sheetName, e.alias, EXCHANGE_ALIASES[e.name], EXCHANGE_ALIASES[e.sheetName]]
+      .filter(Boolean).forEach(n=>{ const k = playerKey(n); if(k && !byKey[k]) byKey[k] = e; });
+  });
+  const taken = new Set(), leftovers = [];
+  entrants.forEach(en=>{
+    const k = playerKey(en.entrant);
+    let e = byKey[k];
+    if(!e){ const close = Object.keys(byKey).filter(x=>x.length > 3 && oneLetterApart(x,k)); if(close.length===1) e = byKey[close[0]]; }
+    if(e && !taken.has(e)){ e.time = en.time; e.viaHost = ''; taken.add(e); }
+    else if(!e) leftovers.push(en);
+  });
+  /* A host uploading a run for someone else shows up as the HOST's entry. If the host didn't
+     compete this edition, that entry belongs to a player with no time yet: the one whose placement
+     equals the entry's position, or the only player still without a time. */
+  const hostKeys = (hosts||[]).map(playerKey);
+  if(hostKeys.length && !entries.some(e=>hostKeys.includes(playerKey(e.name)))){
+    leftovers.filter(en=>hostKeys.includes(playerKey(en.entrant))).forEach(en=>{
+      const free = entries.filter(e=>!taken.has(e));
+      let pick = free.filter(e=>e.place===en.pos);
+      if(pick.length!==1 && free.length===1) pick = free;
+      if(pick.length===1){ pick[0].time = en.time; pick[0].viaHost = stripNote(en.entrant); taken.add(pick[0]); }
+    });
+  }
+  return leftovers;
+}
+
+/* ============ DATA LOADING ============ */
+/** { name: place } for one edition. TMNF reads the main sheet (Worker as backup); TM2020 reads the Worker. */
+async function loadPlacements(c, editionNum){
+  const fromWorker = async season=>{
+    const data = await fetchJson(`${c.workerBase}/data?season=${season}`, '/data');
+    if(data.error) throw new Error(data.error);
+    const ed = (data.editions||[]).find(e=>parseInt(String(e.edition).match(/\d+/)?.[0],10)===editionNum);
+    return ed ? ed.results : {};
+  };
+  if(GAME==='tm20') return retryAsync(()=>fromWorker('tm20'));
+  try {
+    const rows = await retryAsync(()=>fetchSheetCSV(c.sheetId, c.placementsTab));
+    return parsePivot(rows)[editionNum] || {};
+  } catch(err){
+    console.warn('[SpeedTAS] sheet read failed, trying the Worker', err);
+    return retryAsync(()=>fromWorker('s2'));
+  }
+}
+
+/** Players tab (name -> {id, alias}). Falls back to the Worker's /players (IDs only, no aliases). */
+async function loadPlayers(c){
+  try {
+    return parsePlayers(await retryAsync(()=>fetchSheetCSV(c.sheetId, c.playersTab)));
+  } catch(err){
+    console.warn('[SpeedTAS] Players tab read failed, trying the Worker', err);
+    const data = await fetchJson(`${c.workerBase}/players`, '/players');
+    if(data.error) throw new Error(data.error);
+    const map = {};
+    Object.entries(data.players||{}).forEach(([name,id])=>{ map[name] = {id, alias:''}; });
+    return map;
+  }
+}
+
+/** Finds the tmtas.exchange event for this edition: manual ID > pinned ID > /events-index scan
+ *  (same index the dashboard uses) > /find-event search. */
+async function findEvent(c, editionNum, onProgress){
+  const manual = parseInt(document.getElementById('eventIdOverride').value,10);
+  if(manual) return {id:manual, title:''};
+  const pinned = EVENT_ID_OVERRIDES[GAME][String(editionNum)];
+  if(pinned) return {id:pinned, title:''};
+
+  const [from,to] = EVENT_ID_RANGE[GAME];
+  try {
+    for(let i=0;i<12;i++){
+      const b = await fetchJson(`${c.workerBase}/events-index?pattern=${encodeURIComponent(c.pattern)}&from=${from}&to=${to}`, '/events-index');
+      if(b.error) throw new Error(b.error);
+      const ev = (b.events||{})[String(editionNum)];
+      if(ev) return ev;
+      if(b.complete) break;
+      onProgress && onProgress(i+1);
+    }
+  } catch(err){ console.warn('[SpeedTAS] events-index failed, falling back to /find-event', err); }
+
+  const found = await retryAsync(()=>fetchJson(`${c.workerBase}/find-event?edition=${editionNum}&category=${encodeURIComponent(c.pattern)}`, '/find-event'), 2, 800);
+  if(found.error) throw new Error(found.error);
+  return found;
+}
+
+/* ============ MESSAGE ============ */
+const DIGIT_EMOJI = ['0️⃣','1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣'];
 function rankEmoji(n){
-  if(n===1) return '\uD83E\uDD47';
-  if(n===2) return '\uD83E\uDD48';
-  if(n===3) return '\uD83E\uDD49';
-  if(n===10) return '\uD83D\uDD1F';
+  if(n===1) return '🥇';
+  if(n===2) return '🥈';
+  if(n===3) return '🥉';
+  if(n===10) return '🔟';
   if(n<=9) return DIGIT_EMOJI[n];
   return String(n).split('').map(d=>DIGIT_EMOJI[+d]).join(' ');
 }
-
 function ordinal(n){
   const s=['th','st','nd','rd'], v=n%100;
   return n + (s[(v-20)%10] || s[v] || s[0]);
@@ -290,18 +517,16 @@ function buildMessage(){
   const editionNum = parseInt(document.getElementById('editionNum').value,10);
   const clip = document.getElementById('clipLink').value.trim();
   const c = cfg();
-
   const lines = [];
-  lines.push(`# \uD83C\uDFC1  Results of the ${ordinal(editionNum)} SpeedTAS competition \uD83C\uDFC1`);
+  lines.push(`# 🏁  Results of the ${editionNum ? ordinal(editionNum) : '?'} ${c.compName} competition 🏁`);
   currentRoster.forEach(e=>{
-    const who = e.discordId ? `<@${e.discordId}>` : e.name;
+    const who = validDiscordId(e.discordId) ? `<@${e.discordId}>` : (e.sheetName || e.name);
     const time = e.time ? ` ${e.time}` : '';
     lines.push(`${rankEmoji(e.place)}${who}${time}`);
   });
   lines.push('Thank you for competing!');
   lines.push('See you next week!');
   lines.push(`${c.roleId ? `<@&${c.roleId}> : ` : ''}${clip || '[clip link]'}`);
-
   document.getElementById('output').value = lines.join('\n');
 }
 
@@ -310,114 +535,99 @@ function renderRoster(entries){
   tbody.innerHTML = entries.map((e,i)=>`
     <tr>
       <td class="rk">${e.place}</td>
-      <td class="nm">${escapeHtml(e.name)}</td>
-      <td class="idc"><input data-idx="${i}" data-field="discordId" value="${escapeHtml(e.discordId)}" placeholder="Discord ID"></td>
-      <td class="tmc"><input data-idx="${i}" data-field="time" value="${escapeHtml(e.time)}" placeholder="time"></td>
+      <td class="nm">${escapeHtml(e.sheetName || e.name)}${e.sheetName && e.sheetName!==e.name ? `<small>sheet: ${escapeHtml(e.name)}</small>` : ''}${e.viaHost ? `<small>uploaded by ${escapeHtml(e.viaHost)}</small>` : ''}</td>
+      <td class="idc"><input data-idx="${i}" data-field="discordId" value="${escapeHtml(e.discordId)}" placeholder="Discord ID" aria-label="Discord ID for ${escapeHtml(e.name)}" class="${e.discordId && !validDiscordId(e.discordId) ? 'bad' : ''}"></td>
+      <td class="tmc"><input data-idx="${i}" data-field="time" value="${escapeHtml(e.time)}" placeholder="time" aria-label="Time for ${escapeHtml(e.name)}"></td>
     </tr>
   `).join('');
   tbody.querySelectorAll('input').forEach(inp=>{
     inp.addEventListener('input', ()=>{
       const idx = +inp.dataset.idx, field = inp.dataset.field;
       currentRoster[idx][field] = inp.value.trim();
+      if(field==='discordId') inp.classList.toggle('bad', !!inp.value.trim() && !validDiscordId(inp.value.trim()));
       buildMessage();
     });
   });
   document.getElementById('reviewBlock').classList.remove('hidden');
 }
 
+/* ============ GENERATE ============ */
 async function generate(){
   const c = cfg();
+  const game = GAME;
   const editionNum = parseInt(document.getElementById('editionNum').value,10);
   if(!editionNum){ setStatus('Enter a valid edition number.','err'); return; }
-  if(!c.sheetId || !c.workerBase){ setStatus('Sheet ID / Worker base URL missing in advanced settings.','err'); return; }
+  if(!c.workerBase || (game==='tmnf' && !c.sheetId)){ setStatus('Worker URL / Sheet ID missing in advanced settings.','err'); return; }
 
   const btn = document.getElementById('genBtn');
   btn.disabled = true;
   document.getElementById('reviewBlock').classList.add('hidden');
   document.getElementById('output').value = '';
-  setStatus('Fetching sheet data...');
+  currentRoster = []; currentEvent = null;
+  const label = game==='tm20' ? 'TM2020' : 'TMNF';
+  setStatus(`Fetching ${label} placements and Discord IDs...`);
 
   try {
-    const [placementRows, playerRows] = await Promise.all([
-      retryAsync(()=>fetchSheetCSV(c.sheetId, c.placementsTab)),
-      retryAsync(()=>fetchSheetCSV(c.sheetId, c.playersTab))
-    ]);
-
-    const placements = parsePivot(placementRows)[editionNum] || {};
-    const players = parsePlayers(playerRows);
+    const [placements, players] = await Promise.all([loadPlacements(c, editionNum), loadPlayers(c)]);
+    if(GAME!==game) return; // switched game mid-load
 
     const entries = Object.entries(placements)
-      .map(([name,place])=>({
-        name,
-        place: parseInt(place,10),
-        time: '',
-        discordId: (players[name] && players[name].id) || ''
-      }))
+      .map(([name,place])=>{
+        const info = findPlayerInfo(players, name);
+        return {
+          name,
+          sheetName: info ? info.sheetName : '',
+          alias: info ? info.alias : '',
+          place: parseInt(place,10),
+          time: '',
+          viaHost: '',
+          discordId: info && info.id ? info.id : ''
+        };
+      })
       .filter(e=>!isNaN(e.place))
       .sort((a,b)=>a.place-b.place);
 
-    if(!entries.length){
-      throw new Error(`No placements found for edition ${editionNum} on tab "${c.placementsTab}".`);
-    }
-
-    setStatus('Locating this edition on TMTAS Exchange...');
-    const base = c.workerBase.replace(/\/$/,'');
-    const findUrl = `${base}/find-event?edition=${editionNum}&category=${encodeURIComponent('SpeedTAS Season2')}`;
-    const findRes = await retryAsync(()=>fetch(findUrl).then(async r=>{
-      const data = await r.json().catch(()=>null);
-      if(!data) throw new Error(`HTTP ${r.status} from /find-event \u2014 is the Worker deployed with this route?`);
-      return data;
-    }), 2, 800);
-    if(findRes.error){
-      currentRoster = entries;
-      renderRoster(entries);
-      buildMessage();
-      setStatus(`Placements and Discord IDs filled in below, but couldn't auto-locate the event: ${findRes.error}`, 'warn');
-      return;
-    }
-    const eventId = findRes.id;
-
-    setStatus(`Found "${findRes.title}" (event ${eventId}) \u2014 loading times...`);
-    const resultsUrl = `${base}/event-results?id=${encodeURIComponent(eventId)}`;
-    const res = await retryAsync(()=>fetch(resultsUrl).then(async r=>{
-      const data = await r.json().catch(()=>null);
-      if(!r.ok) throw new Error((data && data.error) || `HTTP ${r.status} from /event-results`);
-      return data;
-    }));
-    if(res.error) throw new Error(res.error);
-    const results = res.results || [];
-
-    // Match by alias (a player's TMTAS Exchange username, if set in the
-    // Players tab) first, falling back to their sheet name directly — that
-    // fallback is what lets players whose exchange username happens to
-    // equal their sheet name (e.g. "Sneak") match with zero setup.
-    const byExchangeName = {};
-    entries.forEach(e=>{
-      const info = players[e.name];
-      const alias = (info && info.alias) || EXCHANGE_ALIASES_NORM[e.name] || e.name;
-      byExchangeName[normalizeName(alias)] = e;
-    });
-    console.log('[SpeedTAS] entrants from event page:', results.map(r=>r.entrant));
-    console.log('[SpeedTAS] roster names from sheet:', entries.map(e=>e.name));
-
-    results.forEach(r=>{
-      const match = byExchangeName[normalizeName(r.entrant)];
-      if(match) match.time = r.time;
-    });
-    const filled = entries.filter(e=>e.time).length;
-    const unmatched = entries.filter(e=>!e.time).map(e=>e.name);
-
+    if(!entries.length) throw new Error(`No ${label} placements found for edition ${editionNum}.`);
     currentRoster = entries;
     renderRoster(entries);
     buildMessage();
 
-    const missingIds = entries.filter(e=>!e.discordId).length;
-    let note = `Done \u2014 ${entries.length} placements, ${filled} times filled from "${res.title || findRes.title}".`;
-    if(missingIds) note += ` ${missingIds} missing a Discord ID.`;
-    if(unmatched.length) note += ` No time match for: ${unmatched.join(', ')} \u2014 check the browser console for the raw entrant names to compare.`;
-    setStatus(note, filled===entries.length && !missingIds ? 'ok' : 'warn');
+    setStatus(`Locating ${label} edition ${editionNum} on TMTAS Exchange...`);
+    let ev;
+    try {
+      ev = await findEvent(c, editionNum, n=>setStatus(`Scanning TMTAS Exchange events (pass ${n})...`));
+    } catch(err){
+      if(GAME!==game) return;
+      setStatus(`Placements and Discord IDs are filled in below, but the event wasn't found: ${err.message} You can type the event ID next to the edition and generate again.`, 'warn');
+      return;
+    }
+    if(GAME!==game) return;
+    currentEvent = ev;
+    const eventLink = `https://tmtas.exchange/events/${ev.id}`;
+
+    setStatus(`Found ${ev.title ? `"${ev.title}"` : 'the event'} (event ${ev.id}) — loading times...`);
+    const res = await retryAsync(()=>fetchJson(`${c.workerBase}/event-results?id=${encodeURIComponent(ev.id)}`, '/event-results'));
+    if(res.error) throw new Error(res.error);
+    if(GAME!==game) return;
+    const results = res.results || [];
+
+    const leftovers = matchEntrants(results, entries, EVENT_HOSTS[game]);
+    console.log('[SpeedTAS] entrants from event page:', results.map(r=>r.entrant));
+    console.log('[SpeedTAS] roster names from sheet:', entries.map(e=>e.name));
+    if(leftovers.length) console.log('[SpeedTAS] unmatched entrants:', leftovers.map(r=>r.entrant));
+
+    renderRoster(entries);
+    buildMessage();
+
+    const filled = entries.filter(e=>e.time).length;
+    const unmatched = entries.filter(e=>!e.time).map(e=>e.sheetName || e.name);
+    const missingIds = entries.filter(e=>!validDiscordId(e.discordId)).map(e=>e.sheetName || e.name);
+    let note = `Done — ${entries.length} placements, ${filled} times from "${res.title || ev.title || 'event ' + ev.id}".`;
+    if(missingIds.length) note += ` Missing/invalid Discord ID: ${missingIds.join(', ')}.`;
+    if(unmatched.length) note += ` No time for: ${unmatched.join(', ')}${leftovers.length ? ` (unmatched entrants: ${leftovers.map(r=>r.entrant).join(', ')})` : ''}.`;
+    setStatus(note, filled===entries.length && !missingIds.length ? 'ok' : 'warn', eventLink);
   } catch(err){
-    setStatus('Error: ' + err.message, 'err');
+    if(GAME===game) setStatus('Error: ' + err.message, 'err');
   } finally {
     btn.disabled = false;
   }
@@ -426,15 +636,28 @@ async function generate(){
 function copyOutput(){
   const ta = document.getElementById('output');
   if(!ta.value) return;
-  navigator.clipboard.writeText(ta.value).then(()=>{
-    const btn = document.querySelector('.copy-btn');
-    const orig = btn.textContent;
-    btn.textContent = 'Copied!';
-    setTimeout(()=>btn.textContent=orig, 1400);
-  });
+  const btn = document.getElementById('copyBtn');
+  const done = ()=>{ const orig = 'Copy'; btn.textContent = 'Copied!'; setTimeout(()=>btn.textContent=orig, 1400); };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(ta.value).then(done).catch(()=>{ ta.select(); document.execCommand('copy'); done(); });
+  } else { ta.select(); document.execCommand('copy'); done(); }
 }
 
+/* ============ INIT ============ */
+loadSettings();
+let savedGame = 'tmnf';
+try { savedGame = new URLSearchParams(location.search).get('game') || localStorage.getItem(GAME_KEY) || 'tmnf'; } catch(e){}
+setGame(savedGame);
+document.querySelectorAll('.game-switch button').forEach(b=>b.addEventListener('click', ()=>setGame(b.dataset.game)));
+document.getElementById('genBtn').addEventListener('click', generate);
+document.getElementById('copyBtn').addEventListener('click', copyOutput);
 document.getElementById('clipLink').addEventListener('input', buildMessage);
+document.getElementById('editionNum').addEventListener('keydown', e=>{ if(e.key==='Enter') generate(); });
+document.getElementById('resetCfg').addEventListener('click', ()=>{
+  try { localStorage.removeItem(SETTINGS_KEY); } catch(e){}
+  document.querySelectorAll('[data-cfg]').forEach(inp=>{ inp.value = DEFAULTS[inp.dataset.cfg]; });
+  buildMessage();
+});
 </script>
 </body>
 </html>

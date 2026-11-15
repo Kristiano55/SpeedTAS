@@ -63,6 +63,8 @@ table.rt td{padding:5px 6px;border-bottom:0.5px solid #1e1e24;vertical-align:mid
 table.rt td.rk{color:var(--accent);font-weight:600;width:34px}
 table.rt td.nm{color:#e8e8f0;white-space:nowrap}
 table.rt td.nm small{display:block;color:#66667a;font-size:10.5px}
+table.rt td.nm small.auto{color:#fbbf24}
+table.rt tr.auto-row td.tmc input{border-color:rgba(251,191,36,.6)}
 table.rt input{padding:5px 8px;font-size:12.5px}
 table.rt input.bad{border-color:#f87171}
 table.rt td.idc{width:180px}
@@ -147,7 +149,7 @@ textarea#output{height:340px;font-family:'JetBrains Mono',monospace;font-size:12
       If it can't be found you can type the event ID in the field next to the edition.
       For times, an optional Players-tab column with "TMX", "Exchange" or "Alias" in the header can hold a player's
       exchange username when it's very different from their sheet name.
-      <button type="button" class="secondary" id="resetCfg" style="margin-top:8px;display:block">Reset settings to defaults</button>
+      <button type="button" class="secondary" id="resetCfg" style="margin-top:8px;display:block">Reset settings and learned names</button>
     </div>
   </details>
 
@@ -407,13 +409,43 @@ function findPlayerInfo(players, name){
   return hit ? {sheetName:hit, ...players[hit]} : null;
 }
 
-/** Pairs TMTAS Exchange entrants with roster entries. Each roster entry can be reached by its
- *  sheet name, its Players-tab name, its Players-tab alias, or EXCHANGE_ALIASES; a one-letter
- *  typo is accepted only when exactly one player is that close. */
+/* Exchange usernames this browser has learned for a player (playerKey -> entrant name). Filled when you
+   copy a post that used an automatic match, so next time that player matches by name straight away. */
+const LEARNED_KEY = 'speedtas_results_generator_learned';
+function loadLearned(){ try { return JSON.parse(localStorage.getItem(LEARNED_KEY) || '{}') || {}; } catch(e){ return {}; } }
+function saveLearned(map){ try { localStorage.setItem(LEARNED_KEY, JSON.stringify(map)); } catch(e){} }
+
+function parseTimeSeconds(t){
+  const m = String(t || '').trim().match(/^(?:(\d+):)?(\d+(?:\.\d+)?)$/);
+  return m ? (m[1] ? parseInt(m[1],10) * 60 : 0) + parseFloat(m[2]) : null;
+}
+/** 0..1 name likeness on identity keys: 1 = same, ~0.9 = one contains the other, otherwise edit distance. */
+function nameSimilarity(a, b){
+  a = playerKey(a); b = playerKey(b);
+  if(!a || !b) return 0;
+  if(a === b) return 1;
+  if(Math.min(a.length,b.length) >= 3 && (a.includes(b) || b.includes(a))) return 0.9;
+  const d = Array.from({length:a.length+1}, (_,i)=>[i, ...Array(b.length).fill(0)]);
+  for(let j=1;j<=b.length;j++) d[0][j] = j;
+  for(let i=1;i<=a.length;i++) for(let j=1;j<=b.length;j++)
+    d[i][j] = Math.min(d[i-1][j]+1, d[i][j-1]+1, d[i-1][j-1] + (a[i-1]===b[j-1] ? 0 : 1));
+  return 1 - d[a.length][b.length] / Math.max(a.length, b.length);
+}
+
+/** Pairs TMTAS Exchange entrants with roster entries, most certain first:
+ *  1. by name: sheet name, Players-tab name/alias, EXCHANGE_ALIASES, names learned earlier, or a
+ *     one-letter typo when exactly one player is that close;
+ *  2. a host's upload made on a non-competing player's behalf;
+ *  3. adapting to unknown exchange names: each player still without a time gets the leftover entry
+ *     whose time fits between the players placed just above and below them — if several fit, the
+ *     one at the same board position, else the clearly most similar name.
+ *  Step-3 matches are flagged (e.autoFrom) so they can be checked before posting. */
 function matchEntrants(entrants, entries, hosts){
+  const learned = loadLearned();
   const byKey = {};
   entries.forEach(e=>{
-    [e.name, e.sheetName, e.alias, EXCHANGE_ALIASES[e.name], EXCHANGE_ALIASES[e.sheetName]]
+    e.time = ''; e.viaHost = ''; e.autoFrom = ''; e.autoWhy = '';
+    [e.name, e.sheetName, e.alias, EXCHANGE_ALIASES[e.name], EXCHANGE_ALIASES[e.sheetName], learned[playerKey(e.name)]]
       .filter(Boolean).forEach(n=>{ const k = playerKey(n); if(k && !byKey[k]) byKey[k] = e; });
   });
   const taken = new Set(), leftovers = [];
@@ -421,22 +453,63 @@ function matchEntrants(entrants, entries, hosts){
     const k = playerKey(en.entrant);
     let e = byKey[k];
     if(!e){ const close = Object.keys(byKey).filter(x=>x.length > 3 && oneLetterApart(x,k)); if(close.length===1) e = byKey[close[0]]; }
-    if(e && !taken.has(e)){ e.time = en.time; e.viaHost = ''; taken.add(e); }
+    if(e && !taken.has(e)){ e.time = en.time; taken.add(e); }
     else if(!e) leftovers.push(en);
   });
-  /* A host uploading a run for someone else shows up as the HOST's entry. If the host didn't
-     compete this edition, that entry belongs to a player with no time yet: the one whose placement
-     equals the entry's position, or the only player still without a time. */
+
   const hostKeys = (hosts||[]).map(playerKey);
-  if(hostKeys.length && !entries.some(e=>hostKeys.includes(playerKey(e.name)))){
+  const isHost = en=>hostKeys.includes(playerKey(en.entrant));
+  const hostCompeted = entries.some(e=>hostKeys.includes(playerKey(e.name)));
+  const used = new Set();
+  if(hostKeys.length && !hostCompeted){
     leftovers.filter(en=>hostKeys.includes(playerKey(en.entrant))).forEach(en=>{
       const free = entries.filter(e=>!taken.has(e));
       let pick = free.filter(e=>e.place===en.pos);
       if(pick.length!==1 && free.length===1) pick = free;
-      if(pick.length===1){ pick[0].time = en.time; pick[0].viaHost = stripNote(en.entrant); taken.add(pick[0]); }
+      if(pick.length===1){ pick[0].time = en.time; pick[0].viaHost = stripNote(en.entrant); taken.add(pick[0]); used.add(en); }
     });
   }
-  return leftovers;
+
+  /* Step 3. A host's entry only joins the pool when the host didn't compete (then it's someone's upload). */
+  let pool = leftovers.filter(en=>!used.has(en) && (!isHost(en) || !hostCompeted));
+  const timeOf = e=>parseTimeSeconds(e.time);
+  entries.filter(e=>!taken.has(e)).sort((x,y)=>x.place-y.place).forEach(e=>{
+    if(!pool.length) return;
+    const timed = entries.filter(o=>taken.has(o) && timeOf(o)!=null);
+    const above = timed.filter(o=>o.place < e.place).map(timeOf), below = timed.filter(o=>o.place > e.place).map(timeOf);
+    const lo = above.length ? Math.max(...above) : -Infinity, hi = below.length ? Math.min(...below) : Infinity;
+    const eps = 0.0001;
+    const fits = pool.filter(en=>{ const t = parseTimeSeconds(en.time); return t==null || (t >= lo - eps && t <= hi + eps); });
+    let pick = null, why = '';
+    if(fits.length === 1){ pick = fits[0]; why = 'only time that fits'; }
+    else if(fits.length > 1){
+      /* Clearly similar name > same board position (positions shift when a guest is on the board) > weaker name hint. */
+      const scored = fits.map(en=>({en, s: isHost(en) ? 0 : Math.max(...[e.name, e.sheetName, e.alias].filter(Boolean).map(n=>nameSimilarity(n, en.entrant)))})).sort((x,y)=>y.s-x.s);
+      const lead = scored.length === 1 ? 1 : scored[0].s - scored[1].s;
+      const samePos = fits.filter(en=>en.pos === e.place);
+      if(scored[0].s >= 0.75 && lead >= 0.15){ pick = scored[0].en; why = 'similar name'; }
+      else if(samePos.length === 1){ pick = samePos[0]; why = 'same position'; }
+      else if(scored[0].s >= 0.5 && lead >= 0.15){ pick = scored[0].en; why = 'similar name'; }
+    }
+    if(pick){
+      e.time = pick.time;
+      if(isHost(pick)) e.viaHost = stripNote(pick.entrant); // never learn a host's name as this player's
+      else { e.autoFrom = stripNote(pick.entrant); e.autoWhy = why; }
+      taken.add(e); pool = pool.filter(en=>en!==pick);
+    }
+  });
+  return pool;
+}
+
+/** Called when a post is copied: auto-matched exchange names whose time you left as found are
+ *  remembered, so those players match by name from now on. */
+function learnFromRoster(){
+  const learned = loadLearned(); let added = 0;
+  currentRoster.forEach(e=>{
+    if(e.autoFrom && e.time === e.autoTime){ learned[playerKey(e.name)] = e.autoFrom; added++; }
+  });
+  if(added) saveLearned(learned);
+  return added;
 }
 
 /* ============ DATA LOADING ============ */
@@ -533,9 +606,9 @@ function buildMessage(){
 function renderRoster(entries){
   const tbody = document.getElementById('rosterBody');
   tbody.innerHTML = entries.map((e,i)=>`
-    <tr>
+    <tr class="${e.autoFrom ? 'auto-row' : ''}">
       <td class="rk">${e.place}</td>
-      <td class="nm">${escapeHtml(e.sheetName || e.name)}${e.sheetName && e.sheetName!==e.name ? `<small>sheet: ${escapeHtml(e.name)}</small>` : ''}${e.viaHost ? `<small>uploaded by ${escapeHtml(e.viaHost)}</small>` : ''}</td>
+      <td class="nm">${escapeHtml(e.sheetName || e.name)}${e.sheetName && e.sheetName!==e.name ? `<small>sheet: ${escapeHtml(e.name)}</small>` : ''}${e.viaHost ? `<small>uploaded by ${escapeHtml(e.viaHost)}</small>` : ''}${e.autoFrom ? `<small class="auto" title="Matched automatically (${escapeHtml(e.autoWhy)}) — check it">≈ exchange: ${escapeHtml(e.autoFrom)} · check</small>` : ''}</td>
       <td class="idc"><input data-idx="${i}" data-field="discordId" value="${escapeHtml(e.discordId)}" placeholder="Discord ID" aria-label="Discord ID for ${escapeHtml(e.name)}" class="${e.discordId && !validDiscordId(e.discordId) ? 'bad' : ''}"></td>
       <td class="tmc"><input data-idx="${i}" data-field="time" value="${escapeHtml(e.time)}" placeholder="time" aria-label="Time for ${escapeHtml(e.name)}"></td>
     </tr>
@@ -612,6 +685,7 @@ async function generate(){
     const results = res.results || [];
 
     const leftovers = matchEntrants(results, entries, EVENT_HOSTS[game]);
+    entries.forEach(e=>{ e.autoTime = e.autoFrom ? e.time : ''; });
     console.log('[SpeedTAS] entrants from event page:', results.map(r=>r.entrant));
     console.log('[SpeedTAS] roster names from sheet:', entries.map(e=>e.name));
     if(leftovers.length) console.log('[SpeedTAS] unmatched entrants:', leftovers.map(r=>r.entrant));
@@ -623,9 +697,11 @@ async function generate(){
     const unmatched = entries.filter(e=>!e.time).map(e=>e.sheetName || e.name);
     const missingIds = entries.filter(e=>!validDiscordId(e.discordId)).map(e=>e.sheetName || e.name);
     let note = `Done — ${entries.length} placements, ${filled} times from "${res.title || ev.title || 'event ' + ev.id}".`;
+    const auto = entries.filter(e=>e.autoFrom);
+    if(auto.length) note += ` Matched by time/position — please check: ${auto.map(e=>`${e.sheetName || e.name} ← "${e.autoFrom}"`).join(', ')}. (Copying the post remembers these.)`;
     if(missingIds.length) note += ` Missing/invalid Discord ID: ${missingIds.join(', ')}.`;
     if(unmatched.length) note += ` No time for: ${unmatched.join(', ')}${leftovers.length ? ` (unmatched entrants: ${leftovers.map(r=>r.entrant).join(', ')})` : ''}.`;
-    setStatus(note, filled===entries.length && !missingIds.length ? 'ok' : 'warn', eventLink);
+    setStatus(note, filled===entries.length && !missingIds.length && !auto.length ? 'ok' : 'warn', eventLink);
   } catch(err){
     if(GAME===game) setStatus('Error: ' + err.message, 'err');
   } finally {
@@ -637,7 +713,7 @@ function copyOutput(){
   const ta = document.getElementById('output');
   if(!ta.value) return;
   const btn = document.getElementById('copyBtn');
-  const done = ()=>{ const orig = 'Copy'; btn.textContent = 'Copied!'; setTimeout(()=>btn.textContent=orig, 1400); };
+  const done = ()=>{ learnFromRoster(); btn.textContent = 'Copied!'; setTimeout(()=>btn.textContent='Copy', 1400); };
   if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(ta.value).then(done).catch(()=>{ ta.select(); document.execCommand('copy'); done(); });
   } else { ta.select(); document.execCommand('copy'); done(); }
@@ -654,7 +730,7 @@ document.getElementById('copyBtn').addEventListener('click', copyOutput);
 document.getElementById('clipLink').addEventListener('input', buildMessage);
 document.getElementById('editionNum').addEventListener('keydown', e=>{ if(e.key==='Enter') generate(); });
 document.getElementById('resetCfg').addEventListener('click', ()=>{
-  try { localStorage.removeItem(SETTINGS_KEY); } catch(e){}
+  try { localStorage.removeItem(SETTINGS_KEY); localStorage.removeItem(LEARNED_KEY); } catch(e){}
   document.querySelectorAll('[data-cfg]').forEach(inp=>{ inp.value = DEFAULTS[inp.dataset.cfg]; });
   buildMessage();
 });
